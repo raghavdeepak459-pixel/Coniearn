@@ -3,140 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Cash - Official Earning App</title>
+    <title>Studio Cash - Secure Earn</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type='text/javascript' src='https://pl28403209.effectivegatecpm.com/6a/03/f3/6a03f30aca96ee5803a99da560088b8c.js'></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { background: #000; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        #app-interface, #withdraw-screen, #task-overlay, #refer-screen, #admin-panel { display: none; }
-        .nav-active { color: #eab308; border-top: 2px solid #eab308; }
-        .tab-btn { display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: bold; transition: 0.3s; }
+        .hidden-screen { display: none !important; }
+        .task-timer { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: bold; color: #666; transition: 0.3s; }
+        .nav-active { color: #eab308; }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-24 p-6">
 
-    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-        <div class="w-20 h-20 bg-yellow-500 rounded-[2rem] mb-6 flex items-center justify-center shadow-[0_0_50px_rgba(234,179,8,0.3)]">
-            <span class="text-4xl text-black">💰</span>
-        </div>
-        <h1 class="text-4xl font-black italic text-yellow-500 mb-2 tracking-tighter">STUDIO_CASH</h1>
-        <p class="text-zinc-500 text-[10px] tracking-[5px] mb-10 uppercase font-bold">Official Secure App</p>
+    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center text-center">
+        <h1 class="text-4xl font-black italic text-yellow-500 mb-2">STUDIO_CASH</h1>
+        <p class="text-zinc-500 text-[10px] tracking-[4px] mb-10 uppercase">Start Earning Now</p>
         <button onclick="loginWithGoogle()" class="w-full max-w-xs bg-white text-black py-4 rounded-2xl font-black flex items-center justify-center gap-3 active:scale-95 transition">
-            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6">
-            Sign in with Google
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6"> Login with Google
         </button>
     </div>
 
-    <div id="app-interface" class="max-w-md mx-auto p-6">
+    <div id="app-interface" class="max-w-md mx-auto hidden-screen">
         <div class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
-                <img id="user-photo" src="" class="w-10 h-10 rounded-full border-2 border-yellow-500/20 shadow-lg">
-                <h2 id="user-name" class="text-sm font-black italic">User</h2>
+                <img id="user-photo" src="" class="w-10 h-10 rounded-full border border-zinc-700">
+                <h2 id="user-name" class="text-sm font-bold">User</h2>
             </div>
-            <div class="flex gap-4">
-                <button id="admin-btn" onclick="openAdmin()" class="hidden bg-red-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black animate-pulse shadow-lg shadow-red-600/30 uppercase">Admin</button>
-                <button onclick="logout()" class="text-[10px] font-bold text-red-500 uppercase">Logout</button>
+            <div class="flex gap-2">
+                <button id="admin-btn" onclick="openScreen('admin-panel')" class="hidden bg-red-600 text-white px-3 py-1 rounded-full text-[9px] font-black animate-pulse">ADMIN</button>
+                <button onclick="logout()" class="text-[10px] font-bold text-red-500">LOGOUT</button>
             </div>
         </div>
 
-        <div class="glass-card p-8 rounded-[40px] text-center mb-6 relative border-t border-white/10 shadow-2xl">
+        <div class="glass-card p-8 rounded-[40px] text-center mb-6 border-yellow-500/20 shadow-2xl">
             <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Wallet Balance</p>
             <div class="flex items-center justify-center gap-3">
                 <span class="text-4xl">🪙</span>
                 <h1 id="balance" class="text-5xl font-black tracking-tighter">0</h1>
             </div>
-            <p class="text-green-500 font-bold mt-4 text-xs">Verified Value: ₹<span id="rupees">0</span>.00</p>
+            <p class="text-green-500 font-bold mt-4 text-xs">≈ ₹ <span id="rupees">0</span>.00</p>
         </div>
 
-        <div class="flex items-center gap-2 mb-8 bg-white/5 p-3 rounded-2xl border border-white/5 overflow-hidden">
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
-            <marquee class="text-[10px] font-bold text-zinc-400">Recent Payout: Rahul ₹250 | Aman ₹100 | Soniya ₹500 | Studio Cash is 100% Real!</marquee>
-        </div>
-
-        <div class="space-y-4 mb-24">
-            <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-2">Earning Tasks</h3>
-            
-            <div class="glass-card p-5 rounded-[30px] flex justify-between items-center">
-                <div class="flex gap-4 items-center">
-                    <div class="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center text-xl">🎬</div>
-                    <div>
-                        <h4 class="text-sm font-bold text-white">Watch Video</h4>
-                        <p class="text-[10px] text-zinc-500">+100 Coins • High CPV</p>
-                    </div>
+        <div class="space-y-4 mb-10">
+            <button onclick="openScreen('social-tasks-screen')" class="w-full glass-card p-5 rounded-[25px] flex justify-between items-center border-l-4 border-blue-500 active:scale-95 transition">
+                <div class="text-left">
+                    <h4 class="text-sm font-bold">Social Tasks</h4>
+                    <p class="text-[10px] text-zinc-500">Follow & Earn Money</p>
                 </div>
-                <button onclick="startTask(100, 'Watch Video', 'https://www.profitabledisplaynetwork.com/YOUR_DIRECT_LINK')" class="bg-yellow-500 text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase">Watch</button>
-            </div>
+                <span class="text-xl">⚡</span>
+            </button>
 
-            <div class="glass-card p-5 rounded-[30px] flex justify-between items-center border-l-4 border-pink-500" onclick="openRefer()">
-                <div class="flex gap-4 items-center">
-                    <div class="w-12 h-12 bg-pink-500/10 rounded-2xl flex items-center justify-center text-xl">🤝</div>
-                    <div>
-                        <h4 class="text-sm font-bold text-pink-500 italic">Refer & Earn</h4>
-                        <p class="text-[10px] text-zinc-500">+200 Coins per friend</p>
-                    </div>
+            <div class="glass-card p-5 rounded-[25px] flex justify-between items-center border-l-4 border-yellow-500">
+                <div class="text-left">
+                    <h4 class="text-sm font-bold">Watch & Earn</h4>
+                    <p class="text-[10px] text-zinc-500">Video Ad (+50 Coins)</p>
                 </div>
-                <span class="text-zinc-500">➔</span>
+                <button onclick="startTask(50, 'Video Ad')" class="bg-yellow-500 text-black px-5 py-2 rounded-xl text-[10px] font-black">WATCH</button>
             </div>
         </div>
     </div>
 
-    <div id="admin-panel" class="fixed inset-0 bg-black z-[200] p-6 overflow-y-auto">
+    <div id="social-tasks-screen" class="fixed inset-0 bg-black z-50 p-6 overflow-y-auto hidden-screen">
+        <button onclick="closeScreen('social-tasks-screen')" class="text-zinc-500 font-bold mb-6 text-xs">← BACK</button>
+        <h2 class="text-2xl font-black mb-6 italic">SOCIAL JOBS</h2>
+        <div id="user-task-list" class="space-y-4"></div>
+    </div>
+
+    <div id="history-screen" class="fixed inset-0 bg-black z-50 p-6 overflow-y-auto hidden-screen">
+        <button onclick="closeScreen('history-screen')" class="text-zinc-500 font-bold mb-6 text-xs">← BACK</button>
+        <h2 class="text-2xl font-black mb-6 italic uppercase">Transaction History</h2>
+        <div id="history-list" class="space-y-3"></div>
+    </div>
+
+    <div id="withdraw-screen" class="fixed inset-0 bg-black z-50 p-8 hidden-screen">
+        <button onclick="closeScreen('withdraw-screen')" class="text-zinc-500 font-bold mb-10 text-xs uppercase">← Back</button>
+        <h2 class="text-3xl font-black mb-8 italic">Withdraw Cash</h2>
+        <input id="upi-id" type="text" placeholder="Enter UPI ID" class="w-full bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6 outline-none focus:border-blue-600">
+        <button onclick="submitWithdraw()" class="w-full bg-green-600 py-5 rounded-2xl font-black uppercase text-xs">Submit Request</button>
+    </div>
+
+    <div id="admin-panel" class="fixed inset-0 bg-zinc-950 z-[200] p-6 overflow-y-auto hidden-screen">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-black text-red-500 italic uppercase tracking-tighter">Admin Dashboard</h2>
-            <button onclick="closeAdmin()" class="bg-zinc-800 p-2 rounded-xl text-xs font-bold">CLOSE X</button>
+            <h2 class="text-xl font-black text-red-600">ADMIN</h2>
+            <button onclick="closeScreen('admin-panel')" class="bg-zinc-800 px-4 py-1 rounded-lg text-xs">X</button>
         </div>
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-[10px] text-zinc-500 font-bold uppercase">Total Users</p>
-                <h3 id="admin-total-users" class="text-2xl font-black text-yellow-500">0</h3>
-            </div>
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-[10px] text-zinc-500 font-bold uppercase">Payable Amt</p>
-                <h3 id="admin-total-payouts" class="text-2xl font-black text-green-500">₹0</h3>
-            </div>
+        <div class="glass-card p-5 rounded-2xl mb-8">
+            <h3 class="text-xs font-bold mb-4 uppercase text-zinc-500">Post Social Task</h3>
+            <input id="adm-task-name" type="text" placeholder="Task Name" class="w-full bg-black border border-zinc-800 p-3 rounded-xl mb-3 text-xs">
+            <input id="adm-task-link" type="text" placeholder="Link (Instagram/YT)" class="w-full bg-black border border-zinc-800 p-3 rounded-xl mb-3 text-xs">
+            <input id="adm-task-reward" type="number" placeholder="Coins Reward" class="w-full bg-black border border-zinc-800 p-3 rounded-xl mb-4 text-xs">
+            <button onclick="addNewTask()" class="w-full bg-blue-600 py-3 rounded-xl font-black text-xs uppercase">Post Task</button>
         </div>
-        <div id="payout-list" class="space-y-4">
-            </div>
+        <h3 class="text-xs font-bold text-yellow-500 mb-4 uppercase">Verification Queue</h3>
+        <div id="admin-approval-list" class="space-y-4"></div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/5 p-3 flex justify-around items-center z-50">
-        <button onclick="showPage('home')" class="tab-btn nav-active"><span class="text-xl">🏠</span>Home</button>
-        <button onclick="openRefer()" class="tab-btn"><span class="text-xl">🤝</span>Refer</button>
-        <button onclick="openWithdraw()" class="tab-btn"><span class="text-xl">💳</span>Withdraw</button>
+    <nav class="fixed bottom-0 left-0 right-0 bg-zinc-950/95 border-t border-zinc-800 p-4 flex justify-around items-center z-40">
+        <button onclick="location.reload()" class="nav-btn nav-active">🏠<span>Home</span></button>
+        <button onclick="openScreen('history-screen')" class="nav-btn">📜<span>History</span></button>
+        <button onclick="openScreen('withdraw-screen')" class="nav-btn">💳<span>Wallet</span></button>
     </nav>
 
-    <div id="withdraw-screen" class="fixed inset-0 bg-black z-[60] p-8">
-        <button onclick="closeWithdraw()" class="text-zinc-500 font-bold mb-10 text-xs">← BACK</button>
-        <h2 class="text-3xl font-black mb-2 italic">Withdraw</h2>
-        <p class="text-xs text-yellow-500 mb-8 font-bold uppercase tracking-widest">Min: 10,000 Coins (₹100)</p>
-        <input id="upi-id" type="text" placeholder="Enter UPI ID (e.g. name@upi)" class="w-full bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6 outline-none focus:border-yellow-500 transition">
-        <button onclick="submitWithdraw()" class="w-full bg-yellow-500 text-black py-5 rounded-3xl font-black uppercase shadow-lg">Submit Request</button>
-    </div>
-
-    <div id="refer-screen" class="fixed inset-0 bg-black z-50 p-8">
-        <button onclick="closeRefer()" class="text-zinc-500 font-bold mb-10 text-xs">← CLOSE</button>
-        <h2 class="text-3xl font-black mb-10 italic">Your Referral Code</h2>
-        <div class="glass-card p-8 rounded-[40px] text-center mb-10 border-pink-500/30">
-            <h3 id="my-refer-code" class="text-4xl font-black tracking-widest text-pink-500 uppercase">...</h3>
-        </div>
-        <p class="text-[10px] text-zinc-500 uppercase mb-2">Have a code?</p>
-        <div class="flex gap-2">
-            <input id="input-refer" type="text" placeholder="CODE HERE" class="flex-1 bg-zinc-900 border border-zinc-800 p-5 rounded-2xl outline-none font-black text-center uppercase">
-            <button onclick="applyRefer()" class="bg-white text-black px-6 rounded-2xl font-black text-xs">APPLY</button>
-        </div>
-    </div>
-
-    <div id="task-overlay" class="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center p-10 text-center">
-        <div class="w-20 h-20 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-8"></div>
-        <h2 class="text-xl font-black mb-4 uppercase italic">Verifying Ad...</h2>
-        <p id="timer-display" class="text-6xl font-black text-yellow-500">15s</p>
+    <div id="task-overlay" class="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center p-10 text-center hidden-screen">
+        <h2 class="text-xl font-bold mb-4 italic text-yellow-500" id="task-title">Processing Task...</h2>
+        <div class="w-20 h-20 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p id="timer-display" class="text-5xl font-black text-yellow-500 task-timer">15s</p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, runTransaction, push, remove, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, runTransaction, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA7t1eGYytS6hSbFjNM5uoRuSWHMlueYZo",
@@ -150,104 +130,157 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
-
-        const MY_ADMIN_EMAIL = "draghav349@gmail.com"; 
+        const ADMIN_EMAIL = "draghav349@gmail.com";
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-interface').style.display = 'block';
+                document.getElementById('login-screen').classList.add('hidden-screen');
+                document.getElementById('app-interface').classList.remove('hidden-screen');
                 document.getElementById('user-name').innerText = user.displayName;
                 document.getElementById('user-photo').src = user.photoURL;
-                document.getElementById('my-refer-code').innerText = user.uid.substring(0, 6).toUpperCase();
 
-                if(user.email === MY_ADMIN_EMAIL) {
+                if(user.email === ADMIN_EMAIL) {
                     document.getElementById('admin-btn').classList.remove('hidden');
-                    loadAdminStats();
+                    loadAdminData();
                 }
 
                 onValue(ref(db, 'wallets/' + user.uid), (snap) => {
                     const val = snap.val() || 0;
-                    document.getElementById('balance').innerText = val.toLocaleString();
+                    document.getElementById('balance').innerText = val;
                     document.getElementById('rupees').innerText = Math.floor(val / 100);
                 });
+                loadHistory(); loadUserTasks();
             } else {
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('app-interface').style.display = 'none';
+                document.getElementById('login-screen').classList.remove('hidden-screen');
+                document.getElementById('app-interface').classList.add('hidden-screen');
             }
         });
 
-        window.submitWithdraw = () => {
-            const balanceVal = parseInt(document.getElementById('balance').innerText.replace(/,/g, ''));
-            const upi = document.getElementById('upi-id').value;
-            if(balanceVal < 10000) return alert("❌ Minimum ₹100 Required!");
-            if(!upi) return alert("❌ UPI ID enter karein!");
-
-            push(ref(db, 'payouts'), {
-                uid: auth.currentUser.uid,
-                email: auth.currentUser.email,
-                upi: upi,
-                amount: balanceVal,
-                date: new Date().toLocaleString()
-            }).then(() => {
-                runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), () => 0);
-                alert("🚀 Request Submitted Successfully!");
-                window.closeWithdraw();
-            });
-        };
-
-        function loadAdminStats() {
-            onValue(ref(db, 'payouts'), (snap) => {
-                const list = document.getElementById('payout-list');
-                const data = snap.val();
-                let total = 0;
-                list.innerHTML = '';
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const p = data[id];
-                        total += Math.floor(p.amount / 100);
-                        list.innerHTML += `
-                            <div class="glass-card p-5 rounded-3xl border-l-4 border-yellow-500 shadow-xl">
-                                <h4 class="text-[10px] font-bold text-zinc-500 uppercase">${p.email}</h4>
-                                <p class="text-green-500 font-black text-2xl">₹${Math.floor(p.amount/100)}</p>
-                                <p class="text-sm font-bold text-yellow-500 mt-2">ID: ${p.upi}</p>
-                                <button onclick="window.confirmPay('${id}')" class="w-full mt-4 bg-white text-black py-3 rounded-2xl text-[10px] font-black uppercase">Mark as Paid (Delete)</button>
-                            </div>
-                        `;
-                    });
-                }
-                document.getElementById('admin-total-payouts').innerText = "₹" + total;
-            });
-            onValue(ref(db, 'wallets'), (snap) => {
-                document.getElementById('admin-total-users').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
+        // History System
+        function logHistory(type, amount) {
+            push(ref(db, 'history/' + auth.currentUser.uid), {
+                type: type,
+                amount: amount,
+                date: new Date().toLocaleString([], {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'short'})
             });
         }
 
-        window.confirmPay = (id) => { if(confirm("Paid successfully? Entry will be deleted.")) remove(ref(db, 'payouts/' + id)); };
-        window.startTask = (amt, title, adLink) => {
-            window.open(adLink, '_blank');
-            document.getElementById('task-overlay').style.display = 'flex';
-            let t = 15;
-            const iv = setInterval(() => {
-                t--;
-                document.getElementById('timer-display').innerText = t + "s";
-                if(t <= 0) {
-                    clearInterval(iv);
-                    document.getElementById('task-overlay').style.display = 'none';
+        function loadHistory() {
+            onValue(ref(db, 'history/' + auth.currentUser.uid), (snap) => {
+                const list = document.getElementById('history-list');
+                const data = snap.val(); list.innerHTML = '';
+                if(data) {
+                    Object.keys(data).reverse().forEach(id => {
+                        const h = data[id];
+                        const isMinus = h.type === 'Withdraw';
+                        list.innerHTML += `<div class="glass-card p-4 rounded-2xl flex justify-between border-l-2 ${isMinus ? 'border-red-500' : 'border-green-500'}">
+                            <div><p class="text-[10px] uppercase font-bold text-zinc-400">${h.type}</p><p class="text-[8px] text-zinc-600">${h.date}</p></div>
+                            <p class="font-black ${isMinus ? 'text-red-500' : 'text-green-500'}">${isMinus ? '-' : '+'}${h.amount}</p>
+                        </div>`;
+                    });
+                }
+            });
+        }
+
+        // Social Tasks Logic
+        function loadUserTasks() {
+            onValue(ref(db, 'social_jobs'), (snap) => {
+                const list = document.getElementById('user-task-list');
+                const data = snap.val(); list.innerHTML = '';
+                if(data) {
+                    Object.keys(data).forEach(id => {
+                        const t = data[id];
+                        list.innerHTML += `<div class="glass-card p-5 rounded-3xl">
+                            <h4 class="font-bold text-sm mb-1">${t.name}</h4>
+                            <p class="text-[10px] text-green-500 font-bold mb-4 uppercase tracking-widest">+${t.reward} Coins</p>
+                            <div class="flex gap-2">
+                                <button onclick="window.open('${t.link}', '_blank')" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Follow</button>
+                                <input id="proof-${id}" type="text" placeholder="Your Username" class="flex-1 bg-black border border-zinc-800 rounded-xl px-3 text-[10px] outline-none">
+                                <button onclick="submitProof('${id}', '${t.name}', ${t.reward})" class="bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase">Done</button>
+                            </div>
+                        </div>`;
+                    });
+                }
+            });
+        }
+
+        window.submitProof = (id, name, reward) => {
+            const proof = document.getElementById('proof-'+id).value;
+            if(!proof) return alert("Please enter username!");
+            push(ref(db, 'approvals'), { uid: auth.currentUser.uid, username: proof, taskName: name, reward: reward }).then(() => alert("Proof sent! Reward will be added after verification."));
+        };
+
+        // Ad Task
+        window.startTask = (amt, title) => {
+            document.getElementById('task-title').innerText = title;
+            document.getElementById('task-overlay').classList.remove('hidden-screen');
+            let timeLeft = 15;
+            const timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-display').innerText = timeLeft + "s";
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('task-overlay').classList.add('hidden-screen');
                     runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), (c) => (c || 0) + amt);
-                    alert("Success! 100 Coins added.");
+                    logHistory(title, amt);
+                    alert("Success! Coins Added.");
                 }
             }, 1000);
         };
 
-        window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
+        // Admin Data
+        window.addNewTask = () => {
+            const name = document.getElementById('adm-task-name').value;
+            const link = document.getElementById('adm-task-link').value;
+            const reward = parseInt(document.getElementById('adm-task-reward').value);
+            push(ref(db, 'social_jobs'), { name, link, reward }).then(() => alert("Task Posted!"));
+        };
+
+        function loadAdminData() {
+            onValue(ref(db, 'approvals'), (snap) => {
+                const list = document.getElementById('admin-approval-list');
+                const data = snap.val(); list.innerHTML = '';
+                if(data) {
+                    Object.keys(data).forEach(id => {
+                        const a = data[id];
+                        list.innerHTML += `<div class="glass-card p-4 rounded-xl">
+                            <p class="text-[10px] text-zinc-500">${a.taskName}</p>
+                            <h4 class="font-black text-xs">@${a.username}</h4>
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="approveTask('${id}', '${a.uid}', ${a.reward}, '${a.taskName}')" class="flex-1 bg-green-600 py-2 rounded text-[10px] font-black uppercase tracking-widest">Approve</button>
+                                <button onclick="remove(ref(db, 'approvals/${id}'))" class="bg-red-600 px-3 rounded text-[10px]">X</button>
+                            </div>
+                        </div>`;
+                    });
+                }
+            });
+        }
+
+        window.approveTask = (id, uid, reward, name) => {
+            runTransaction(ref(db, 'wallets/' + uid), (c) => (c || 0) + reward);
+            push(ref(db, 'history/' + uid), { type: 'Social: '+name, amount: reward, date: new Date().toLocaleDateString() });
+            remove(ref(db, 'approvals/' + id));
+        };
+
+        // Withdrawal
+        window.submitWithdraw = () => {
+            const bal = parseInt(document.getElementById('balance').innerText);
+            const upi = document.getElementById('upi-id').value;
+            if(bal < 1000) return alert("Min 1000 Coins!");
+            if(!upi) return alert("Enter UPI!");
+            push(ref(db, 'payouts'), { uid: auth.currentUser.uid, upi, amount: bal }).then(() => {
+                logHistory('Withdraw', bal);
+                runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), () => 0);
+                alert("Withdraw Request Sent!");
+                closeScreen('withdraw-screen');
+            });
+        };
+
+        // UI Helpers
+        window.openScreen = (id) => document.getElementById(id).classList.remove('hidden-screen');
+        window.closeScreen = (id) => document.getElementById(id).classList.add('hidden-screen');
+        window.loginWithGoogle = () => signInWithPopup(auth, provider);
         window.logout = () => signOut(auth);
-        window.openAdmin = () => document.getElementById('admin-panel').style.display = 'block';
-        window.closeAdmin = () => document.getElementById('admin-panel').style.display = 'none';
-        window.openWithdraw = () => document.getElementById('withdraw-screen').style.display = 'block';
-        window.closeWithdraw = () => document.getElementById('withdraw-screen').style.display = 'none';
-        window.openRefer = () => document.getElementById('refer-screen').style.display = 'block';
-        window.closeRefer = () => document.getElementById('refer-screen').style.display = 'none';
     </script>
 </body>
 </html>
