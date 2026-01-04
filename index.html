@@ -9,7 +9,7 @@
     <style>
         body { background: #000; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        #app-interface, #withdraw-screen, #task-overlay, #refer-screen, #history-screen { display: none; }
+        #app-interface, #withdraw-screen, #task-overlay, #refer-screen, #admin-panel { display: none; }
         .nav-active { color: #eab308; border-top: 2px solid #eab308; }
         .tab-btn { display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: bold; transition: 0.3s; }
     </style>
@@ -21,7 +21,7 @@
             <span class="text-4xl text-black">💰</span>
         </div>
         <h1 class="text-4xl font-black italic text-yellow-500 mb-2 tracking-tighter">STUDIO_CASH</h1>
-        <p class="text-zinc-500 text-[10px] tracking-[5px] mb-10 uppercase font-bold">Trusted by Obra Users</p>
+        <p class="text-zinc-500 text-[10px] tracking-[5px] mb-10 uppercase font-bold">Official Secure App</p>
         <button onclick="loginWithGoogle()" class="w-full max-w-xs bg-white text-black py-4 rounded-2xl font-black flex items-center justify-center gap-3 active:scale-95 transition">
             <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6">
             Sign in with Google
@@ -32,15 +32,16 @@
         <div class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
                 <img id="user-photo" src="" class="w-10 h-10 rounded-full border-2 border-yellow-500/20 shadow-lg">
-                <h2 id="user-name" class="text-sm font-black">User</h2>
+                <h2 id="user-name" class="text-sm font-black italic">User</h2>
             </div>
             <div class="flex gap-4">
-                <a href="https://wa.me/91XXXXXXXXXX" class="text-xl">🎧</a> <button onclick="logout()" class="text-[10px] font-bold text-red-500 uppercase">Logout</button>
+                <button id="admin-btn" onclick="openAdmin()" class="hidden bg-red-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black animate-pulse shadow-lg shadow-red-600/30 uppercase">Admin</button>
+                <button onclick="logout()" class="text-[10px] font-bold text-red-500 uppercase">Logout</button>
             </div>
         </div>
 
         <div class="glass-card p-8 rounded-[40px] text-center mb-6 relative border-t border-white/10 shadow-2xl">
-            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Available Balance</p>
+            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Wallet Balance</p>
             <div class="flex items-center justify-center gap-3">
                 <span class="text-4xl">🪙</span>
                 <h1 id="balance" class="text-5xl font-black tracking-tighter">0</h1>
@@ -54,87 +55,88 @@
         </div>
 
         <div class="space-y-4 mb-24">
-            <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-2">Premium Tasks</h3>
+            <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-2">Earning Tasks</h3>
             
             <div class="glass-card p-5 rounded-[30px] flex justify-between items-center">
                 <div class="flex gap-4 items-center">
                     <div class="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center text-xl">🎬</div>
                     <div>
-                        <h4 class="text-sm font-bold">Watch Video Ad</h4>
-                        <p class="text-[10px] text-zinc-500">+50 Coins • High CPV</p>
+                        <h4 class="text-sm font-bold text-white">Watch Video</h4>
+                        <p class="text-[10px] text-zinc-500">+100 Coins • High CPV</p>
                     </div>
                 </div>
-                <button onclick="startTask(50, 'Watch Video', 'https://www.profitabledisplaynetwork.com/YOUR_DIRECT_LINK')" class="bg-yellow-500 text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase">Watch</button>
+                <button onclick="startTask(100, 'Watch Video', 'https://www.profitabledisplaynetwork.com/YOUR_DIRECT_LINK')" class="bg-yellow-500 text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase">Watch</button>
             </div>
 
-            <div class="glass-card p-5 rounded-[30px] flex justify-between items-center">
+            <div class="glass-card p-5 rounded-[30px] flex justify-between items-center border-l-4 border-pink-500" onclick="openRefer()">
                 <div class="flex gap-4 items-center">
-                    <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-xl">🎁</div>
+                    <div class="w-12 h-12 bg-pink-500/10 rounded-2xl flex items-center justify-center text-xl">🤝</div>
                     <div>
-                        <h4 class="text-sm font-bold">Daily Reward</h4>
-                        <p class="text-[10px] text-zinc-500">+100 Coins • Once Daily</p>
+                        <h4 class="text-sm font-bold text-pink-500 italic">Refer & Earn</h4>
+                        <p class="text-[10px] text-zinc-500">+200 Coins per friend</p>
                     </div>
                 </div>
-                <button onclick="dailyBonus()" class="bg-white text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase">Claim</button>
+                <span class="text-zinc-500">➔</span>
             </div>
         </div>
+    </div>
+
+    <div id="admin-panel" class="fixed inset-0 bg-black z-[200] p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-black text-red-500 italic uppercase tracking-tighter">Admin Dashboard</h2>
+            <button onclick="closeAdmin()" class="bg-zinc-800 p-2 rounded-xl text-xs font-bold">CLOSE X</button>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="glass-card p-4 rounded-2xl">
+                <p class="text-[10px] text-zinc-500 font-bold uppercase">Total Users</p>
+                <h3 id="admin-total-users" class="text-2xl font-black text-yellow-500">0</h3>
+            </div>
+            <div class="glass-card p-4 rounded-2xl">
+                <p class="text-[10px] text-zinc-500 font-bold uppercase">Payable Amt</p>
+                <h3 id="admin-total-payouts" class="text-2xl font-black text-green-500">₹0</h3>
+            </div>
+        </div>
+        <div id="payout-list" class="space-y-4">
+            </div>
     </div>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/5 p-3 flex justify-around items-center z-50">
         <button onclick="showPage('home')" class="tab-btn nav-active"><span class="text-xl">🏠</span>Home</button>
         <button onclick="openRefer()" class="tab-btn"><span class="text-xl">🤝</span>Refer</button>
         <button onclick="openWithdraw()" class="tab-btn"><span class="text-xl">💳</span>Withdraw</button>
-        <button onclick="showHistory()" class="tab-btn"><span class="text-xl">📜</span>History</button>
     </nav>
 
     <div id="withdraw-screen" class="fixed inset-0 bg-black z-[60] p-8">
-        <button onclick="closeWithdraw()" class="text-zinc-500 font-bold mb-10 text-xs">← BACK TO HOME</button>
+        <button onclick="closeWithdraw()" class="text-zinc-500 font-bold mb-10 text-xs">← BACK</button>
         <h2 class="text-3xl font-black mb-2 italic">Withdraw</h2>
-        <p class="text-xs text-yellow-500 mb-8 font-bold uppercase tracking-widest">Min. Limit: ₹100 (10,000 Coins)</p>
-        
-        <div class="space-y-6">
-            <div class="bg-white/5 p-5 rounded-3xl border border-white/10">
-                <p class="text-[10px] text-zinc-500 uppercase mb-4">Payout Method</p>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center font-bold">P</div>
-                    <span class="font-bold">Paytm / UPI Wallet</span>
-                </div>
-            </div>
-            <input id="upi-id" type="text" placeholder="Enter UPI ID or Number" class="w-full bg-zinc-900 border border-zinc-800 p-5 rounded-2xl outline-none focus:border-yellow-500 transition">
-            <button onclick="submitWithdraw()" class="w-full bg-yellow-500 text-black py-5 rounded-3xl font-black uppercase shadow-lg shadow-yellow-500/20">Submit Request</button>
-        </div>
+        <p class="text-xs text-yellow-500 mb-8 font-bold uppercase tracking-widest">Min: 10,000 Coins (₹100)</p>
+        <input id="upi-id" type="text" placeholder="Enter UPI ID (e.g. name@upi)" class="w-full bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6 outline-none focus:border-yellow-500 transition">
+        <button onclick="submitWithdraw()" class="w-full bg-yellow-500 text-black py-5 rounded-3xl font-black uppercase shadow-lg">Submit Request</button>
     </div>
 
-    <div id="refer-screen" class="fixed inset-0 bg-black z-50 p-8 flex flex-col">
-        <button onclick="closeRefer()" class="text-zinc-500 font-bold mb-10 text-xs uppercase">← Close</button>
-        <h2 class="text-3xl font-black mb-4 italic">Refer Friends</h2>
-        <p class="text-sm text-zinc-400 mb-8 leading-relaxed">Apne doston ko bulayein. Jab wo aapka code enter karenge, aap dono ko <span class="text-yellow-500 font-bold">200 Coins</span> bonus milega.</p>
-        
+    <div id="refer-screen" class="fixed inset-0 bg-black z-50 p-8">
+        <button onclick="closeRefer()" class="text-zinc-500 font-bold mb-10 text-xs">← CLOSE</button>
+        <h2 class="text-3xl font-black mb-10 italic">Your Referral Code</h2>
         <div class="glass-card p-8 rounded-[40px] text-center mb-10 border-pink-500/30">
-            <p class="text-[10px] text-zinc-500 uppercase mb-2">My Unique Code</p>
-            <h3 id="my-refer-code" class="text-3xl font-black tracking-[10px] text-pink-500">...</h3>
+            <h3 id="my-refer-code" class="text-4xl font-black tracking-widest text-pink-500 uppercase">...</h3>
         </div>
-
-        <div class="space-y-4">
-            <p class="text-[10px] text-zinc-500 uppercase ml-2">Have a Referral Code?</p>
-            <div class="flex gap-2">
-                <input id="input-refer" type="text" placeholder="CODE HERE" class="flex-1 bg-zinc-900 border border-zinc-800 p-5 rounded-2xl outline-none font-black text-center">
-                <button onclick="applyRefer()" class="bg-white text-black px-6 rounded-2xl font-black text-xs uppercase">Apply</button>
-            </div>
+        <p class="text-[10px] text-zinc-500 uppercase mb-2">Have a code?</p>
+        <div class="flex gap-2">
+            <input id="input-refer" type="text" placeholder="CODE HERE" class="flex-1 bg-zinc-900 border border-zinc-800 p-5 rounded-2xl outline-none font-black text-center uppercase">
+            <button onclick="applyRefer()" class="bg-white text-black px-6 rounded-2xl font-black text-xs">APPLY</button>
         </div>
     </div>
 
     <div id="task-overlay" class="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center p-10 text-center">
         <div class="w-20 h-20 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-8"></div>
-        <h2 class="text-xl font-black mb-4 uppercase italic" id="task-title">Verifying Ad...</h2>
+        <h2 class="text-xl font-black mb-4 uppercase italic">Verifying Ad...</h2>
         <p id="timer-display" class="text-6xl font-black text-yellow-500">15s</p>
-        <p class="text-zinc-600 text-xs mt-6 uppercase tracking-widest font-bold">Do not close this page</p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, runTransaction, push, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, runTransaction, push, remove, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA7t1eGYytS6hSbFjNM5uoRuSWHMlueYZo",
@@ -149,8 +151,7 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        window.loginWithGoogle = () => signInWithPopup(auth, provider);
-        window.logout = () => signOut(auth);
+        const MY_ADMIN_EMAIL = "draghav349@gmail.com"; 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -158,8 +159,12 @@
                 document.getElementById('app-interface').style.display = 'block';
                 document.getElementById('user-name').innerText = user.displayName;
                 document.getElementById('user-photo').src = user.photoURL;
-                const myCode = user.uid.substring(0, 6).toUpperCase();
-                document.getElementById('my-refer-code').innerText = myCode;
+                document.getElementById('my-refer-code').innerText = user.uid.substring(0, 6).toUpperCase();
+
+                if(user.email === MY_ADMIN_EMAIL) {
+                    document.getElementById('admin-btn').classList.remove('hidden');
+                    loadAdminStats();
+                }
 
                 onValue(ref(db, 'wallets/' + user.uid), (snap) => {
                     const val = snap.val() || 0;
@@ -172,67 +177,77 @@
             }
         });
 
-        window.startTask = (amt, title, adLink) => {
-            window.open(adLink, '_blank');
-            document.getElementById('task-overlay').style.display = 'flex';
-            let t = 15;
-            const timer = setInterval(() => {
-                t--;
-                document.getElementById('timer-display').innerText = t + "s";
-                if(t <= 0) {
-                    clearInterval(timer);
-                    document.getElementById('task-overlay').style.display = 'none';
-                    runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), (c) => (c || 0) + amt);
-                    alert("✅ Points Verified! " + amt + " coins added.");
-                }
-            }, 1000);
-        };
-
         window.submitWithdraw = () => {
             const balanceVal = parseInt(document.getElementById('balance').innerText.replace(/,/g, ''));
             const upi = document.getElementById('upi-id').value;
-            if(balanceVal < 10000) return alert("❌ Sorry! Kam se kam 10,000 Coins (₹100) chahiye.");
-            if(!upi) return alert("❌ Payout details enter karein!");
+            if(balanceVal < 10000) return alert("❌ Minimum ₹100 Required!");
+            if(!upi) return alert("❌ UPI ID enter karein!");
 
             push(ref(db, 'payouts'), {
                 uid: auth.currentUser.uid,
                 email: auth.currentUser.email,
                 upi: upi,
                 amount: balanceVal,
-                status: 'Pending Verification',
                 date: new Date().toLocaleString()
             }).then(() => {
                 runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), () => 0);
-                alert("🚀 Success! Request bhej di gayi hai. ₹" + Math.floor(balanceVal/100) + " jald hi milenge.");
+                alert("🚀 Request Submitted Successfully!");
                 window.closeWithdraw();
             });
         };
 
-        window.applyRefer = async () => {
-            const code = document.getElementById('input-refer').value.toUpperCase();
-            if(code === auth.currentUser.uid.substring(0,6).toUpperCase()) return alert("Apna code khud use nahi kar sakte!");
-            
-            const usedRef = ref(db, 'usedRefer/' + auth.currentUser.uid);
-            const snap = await get(usedRef);
-            if(snap.exists()) return alert("Pehle hi code use kar chuke ho!");
+        function loadAdminStats() {
+            onValue(ref(db, 'payouts'), (snap) => {
+                const list = document.getElementById('payout-list');
+                const data = snap.val();
+                let total = 0;
+                list.innerHTML = '';
+                if(data) {
+                    Object.keys(data).forEach(id => {
+                        const p = data[id];
+                        total += Math.floor(p.amount / 100);
+                        list.innerHTML += `
+                            <div class="glass-card p-5 rounded-3xl border-l-4 border-yellow-500 shadow-xl">
+                                <h4 class="text-[10px] font-bold text-zinc-500 uppercase">${p.email}</h4>
+                                <p class="text-green-500 font-black text-2xl">₹${Math.floor(p.amount/100)}</p>
+                                <p class="text-sm font-bold text-yellow-500 mt-2">ID: ${p.upi}</p>
+                                <button onclick="window.confirmPay('${id}')" class="w-full mt-4 bg-white text-black py-3 rounded-2xl text-[10px] font-black uppercase">Mark as Paid (Delete)</button>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById('admin-total-payouts').innerText = "₹" + total;
+            });
+            onValue(ref(db, 'wallets'), (snap) => {
+                document.getElementById('admin-total-users').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
+            });
+        }
 
-            runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), (c) => (c || 0) + 100);
-            set(usedRef, code);
-            alert("Referral Applied! +100 Bonus mil gaya.");
+        window.confirmPay = (id) => { if(confirm("Paid successfully? Entry will be deleted.")) remove(ref(db, 'payouts/' + id)); };
+        window.startTask = (amt, title, adLink) => {
+            window.open(adLink, '_blank');
+            document.getElementById('task-overlay').style.display = 'flex';
+            let t = 15;
+            const iv = setInterval(() => {
+                t--;
+                document.getElementById('timer-display').innerText = t + "s";
+                if(t <= 0) {
+                    clearInterval(iv);
+                    document.getElementById('task-overlay').style.display = 'none';
+                    runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), (c) => (c || 0) + amt);
+                    alert("Success! 100 Coins added.");
+                }
+            }, 1000);
         };
 
-        // Navigation helpers
+        window.loginWithGoogle = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
+        window.logout = () => signOut(auth);
+        window.openAdmin = () => document.getElementById('admin-panel').style.display = 'block';
+        window.closeAdmin = () => document.getElementById('admin-panel').style.display = 'none';
         window.openWithdraw = () => document.getElementById('withdraw-screen').style.display = 'block';
         window.closeWithdraw = () => document.getElementById('withdraw-screen').style.display = 'none';
-        window.openRefer = () => document.getElementById('refer-screen').style.display = 'flex';
+        window.openRefer = () => document.getElementById('refer-screen').style.display = 'block';
         window.closeRefer = () => document.getElementById('refer-screen').style.display = 'none';
-        window.dailyBonus = () => {
-            const today = new Date().toDateString();
-            if(localStorage.getItem('dc') === today) return alert("Already claimed today!");
-            localStorage.setItem('dc', today);
-            runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), (c) => (c || 0) + 100);
-            alert("Daily Bonus Added!");
-        };
     </script>
 </body>
 </html>
