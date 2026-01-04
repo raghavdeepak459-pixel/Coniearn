@@ -74,9 +74,7 @@
 
         <div class="mb-10">
             <h3 class="text-xs font-black text-blue-500 mb-4 uppercase tracking-widest">👥 User Balances</h3>
-            <div id="admin-user-list" class="glass-card rounded-2xl p-4 space-y-3 text-[10px]">
-                <p class="text-zinc-600 italic">Loading users...</p>
-            </div>
+            <div id="admin-user-list" class="glass-card rounded-2xl p-4 space-y-3 text-[10px]"></div>
         </div>
 
         <div class="glass-card p-5 rounded-2xl mb-8">
@@ -98,11 +96,12 @@
 
     <div id="history-screen" class="fixed inset-0 bg-black z-50 p-6 overflow-y-auto hidden-screen">
         <button onclick="closeScreen('history-screen')" class="text-zinc-500 font-bold mb-6 text-xs">← BACK</button>
+        <h2 class="text-2xl font-black mb-6 italic">TRANSACTION HISTORY</h2>
         <div id="history-list" class="space-y-3"></div>
     </div>
 
     <div id="withdraw-screen" class="fixed inset-0 bg-black z-50 p-8 hidden-screen">
-        <button onclick="closeScreen('withdraw-screen')" class="text-zinc-500 font-bold mb-10 text-xs">← BACK</button>
+        <button onclick="closeScreen('withdraw-screen')" class="text-zinc-500 font-bold mb-10 text-xs uppercase">← BACK</button>
         <h2 class="text-3xl font-black mb-8 italic">Withdraw Cash</h2>
         <input id="upi-id" type="text" placeholder="Enter UPI ID" class="w-full bg-zinc-900 border border-zinc-800 p-5 rounded-2xl mb-6 outline-none">
         <button onclick="submitWithdraw()" class="w-full bg-green-600 py-5 rounded-2xl font-black uppercase text-xs">Submit Request</button>
@@ -123,7 +122,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, runTransaction, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, runTransaction, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA7t1eGYytS6hSbFjNM5uoRuSWHMlueYZo",
@@ -163,23 +162,18 @@
             }
         });
 
-        // --- ADMIN PANEL FUNCTIONS ---
+        // --- ADMIN PANEL LOGIC ---
         function loadAdminData() {
-            // 1. Get All Wallets
+            // 1. User Balances
             onValue(ref(db, 'wallets'), (snap) => {
                 const list = document.getElementById('admin-user-list');
                 const data = snap.val(); list.innerHTML = '';
-                if(data) {
-                    Object.keys(data).forEach(uid => {
-                        list.innerHTML += `<div class="flex justify-between border-b border-zinc-800 pb-1">
-                            <span class="text-zinc-400">ID: ${uid.substring(0,8)}...</span>
-                            <span class="font-bold text-yellow-500">${data[uid]} Coins</span>
-                        </div>`;
-                    });
-                }
+                if(data) Object.keys(data).forEach(uid => {
+                    list.innerHTML += `<div class="flex justify-between border-b border-zinc-800 pb-1"><span>ID: ${uid.substring(0,8)}...</span><span class="text-yellow-500 font-bold">${data[uid]}</span></div>`;
+                });
             });
 
-            // 2. Get Payout Requests
+            // 2. Payout Requests with Complete Button
             onValue(ref(db, 'payouts'), (snap) => {
                 const list = document.getElementById('admin-payout-list');
                 const data = snap.val(); list.innerHTML = '';
@@ -187,34 +181,93 @@
                     Object.keys(data).forEach(id => {
                         const p = data[id];
                         list.innerHTML += `<div class="glass-card p-4 rounded-xl border-l-4 border-green-500">
-                            <p class="text-[10px] text-zinc-400 mb-1">Email: ${p.email}</p>
-                            <h4 class="font-black text-xs text-white">₹${Math.floor(p.amount/100)} - UPI: ${p.upi}</h4>
-                            <button onclick="remove(ref(db, 'payouts/${id}'))" class="w-full mt-3 bg-white text-black py-2 rounded font-black text-[9px] uppercase">Mark Paid & Remove</button>
+                            <p class="text-[9px] text-zinc-400">User: ${p.email}</p>
+                            <h4 class="font-black text-xs">₹${Math.floor(p.amount/100)} - UPI: ${p.upi}</h4>
+                            <button onclick="markAsPaid('${id}', '${p.uid}', '${p.historyKey}')" class="w-full mt-3 bg-white text-black py-2 rounded font-black text-[9px]">MARK AS PAID & REMOVE</button>
                         </div>`;
                     });
-                } else { list.innerHTML = '<p class="text-[10px] text-zinc-600">No requests.</p>'; }
+                } else { list.innerHTML = '<p class="text-[10px] text-zinc-600 italic text-center">No pending requests...</p>'; }
             });
 
-            // 3. Approval Queue (Proofs)
+            // 3. Social Proofs
             onValue(ref(db, 'approvals'), (snap) => {
                 const list = document.getElementById('admin-approval-list');
                 const data = snap.val(); list.innerHTML = '';
+                if(data) Object.keys(data).forEach(id => {
+                    const a = data[id];
+                    list.innerHTML += `<div class="glass-card p-4 rounded-xl border-l-4 border-yellow-500"><p class="text-[9px] text-zinc-500">${a.taskName}</p><h4 class="font-black text-xs">@${a.username}</h4><div class="flex gap-2 mt-4"><button onclick="approveTask('${id}', '${a.uid}', ${a.reward}, '${a.taskName}')" class="flex-1 bg-green-600 py-2 rounded text-[10px] font-black uppercase">Approve</button><button onclick="remove(ref(db, 'approvals/${id}'))" class="bg-red-600 px-3 rounded text-[10px]">X</button></div></div>`;
+                });
+            });
+        }
+
+        // --- PAYOUT STATUS UPDATER ---
+        window.markAsPaid = (payoutId, userId, historyKey) => {
+            // Update User's history status to "Completed"
+            update(ref(db, `history/${userId}/${historyKey}`), { status: 'Completed' });
+            // Remove from Admin's payout list
+            remove(ref(db, `payouts/${payoutId}`));
+            alert("Payment marked as Completed!");
+        };
+
+        // --- USER WITHDRAWAL ---
+        window.submitWithdraw = () => {
+            const bal = parseInt(document.getElementById('balance').innerText);
+            const upi = document.getElementById('upi-id').value;
+            if(bal < 1000) return alert("Min 1000 Coins Required!");
+            if(!upi) return alert("Enter UPI ID!");
+
+            // 1. Create History entry first to get the key
+            const historyRef = push(ref(db, 'history/' + auth.currentUser.uid));
+            const hKey = historyRef.key;
+
+            const payoutData = {
+                uid: auth.currentUser.uid,
+                email: auth.currentUser.email,
+                upi: upi,
+                amount: bal,
+                historyKey: hKey // Linking history with payout
+            };
+
+            // 2. Submit to payouts
+            push(ref(db, 'payouts'), payoutData).then(() => {
+                // 3. Update History with Pending status
+                set(historyRef, {
+                    type: 'Withdraw',
+                    amount: bal,
+                    date: new Date().toLocaleDateString(),
+                    status: 'Pending' // Initial Status
+                });
+                runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), () => 0);
+                alert("Request Sent! Tracking ID created.");
+                closeScreen('withdraw-screen');
+            });
+        };
+
+        // --- USER HISTORY VIEW ---
+        function loadHistory() {
+            onValue(ref(db, 'history/' + auth.currentUser.uid), (snap) => {
+                const list = document.getElementById('history-list');
+                const data = snap.val(); list.innerHTML = '';
                 if(data) {
-                    Object.keys(data).forEach(id => {
-                        const a = data[id];
-                        list.innerHTML += `<div class="glass-card p-4 rounded-xl border-l-4 border-yellow-500">
-                            <p class="text-[9px] text-zinc-500">${a.taskName}</p>
-                            <h4 class="font-black text-xs">@${a.username}</h4>
-                            <div class="flex gap-2 mt-4">
-                                <button onclick="approveTask('${id}', '${a.uid}', ${a.reward}, '${a.taskName}')" class="flex-1 bg-green-600 py-2 rounded text-[10px] font-black uppercase">Approve</button>
-                                <button onclick="remove(ref(db, 'approvals/${id}'))" class="bg-red-600 px-3 rounded text-[10px]">X</button>
+                    Object.keys(data).reverse().forEach(id => {
+                        const h = data[id];
+                        const isWithdraw = h.type === 'Withdraw';
+                        const statusClass = h.status === 'Completed' ? 'text-green-500' : 'text-yellow-500';
+                        
+                        list.innerHTML += `<div class="glass-card p-4 rounded-2xl flex justify-between border-l-2 ${isWithdraw ? 'border-red-500' : 'border-green-500'}">
+                            <div>
+                                <p class="text-[10px] uppercase font-bold text-zinc-400">${h.type}</p>
+                                <p class="text-[8px] text-zinc-600">${h.date}</p>
+                                ${isWithdraw ? `<p class="text-[9px] font-black mt-1 ${statusClass}">${h.status === 'Completed' ? '✅ Completed' : '⏳ Pending'}</p>` : ''}
                             </div>
+                            <p class="font-black ${isWithdraw ? 'text-red-500' : 'text-green-500'}">${isWithdraw ? '-' : '+'}${h.amount}</p>
                         </div>`;
                     });
                 }
             });
         }
 
+        // ... Baki Existing Functions (Ad Task, Social proof, screens) ...
         window.approveTask = (id, uid, reward, name) => {
             runTransaction(ref(db, 'wallets/' + uid), (c) => (c || 0) + reward);
             push(ref(db, 'history/' + uid), { type: 'Job: '+name, amount: reward, date: new Date().toLocaleDateString() });
@@ -231,26 +284,6 @@
             });
         };
 
-        // --- USER FUNCTIONS ---
-        window.submitWithdraw = () => {
-            const bal = parseInt(document.getElementById('balance').innerText);
-            const upi = document.getElementById('upi-id').value;
-            if(bal < 1000) return alert("Min 1000 Coins!");
-            if(!upi) return alert("Enter UPI!");
-            push(ref(db, 'payouts'), { 
-                uid: auth.currentUser.uid, 
-                email: auth.currentUser.email, 
-                upi, 
-                amount: bal 
-            }).then(() => {
-                push(ref(db, 'history/' + auth.currentUser.uid), { type: 'Withdraw', amount: bal, date: new Date().toLocaleDateString() });
-                runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), () => 0);
-                alert("Withdraw Request Sent!");
-                closeScreen('withdraw-screen');
-            });
-        };
-
-        // ... Baki functions (logHistory, loadUserTasks, startTask, etc.) pehle jaise hi hain ...
         window.startTask = (amt, title) => {
             document.getElementById('task-title').innerText = title;
             document.getElementById('task-overlay').classList.remove('hidden-screen');
@@ -268,39 +301,20 @@
             }, 1000);
         };
 
-        function loadUserTasks() {
-            onValue(ref(db, 'social_jobs'), (snap) => {
-                const list = document.getElementById('user-task-list');
-                const data = snap.val(); list.innerHTML = '';
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const t = data[id];
-                        list.innerHTML += `<div class="glass-card p-5 rounded-3xl"><h4 class="font-bold text-sm mb-1">${t.name}</h4><p class="text-[10px] text-green-500 font-bold mb-4">+${t.reward} Coins</p><div class="flex gap-2"><button onclick="window.open('${t.link}', '_blank')" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Follow</button><input id="proof-${id}" type="text" placeholder="Username" class="flex-1 bg-black border border-zinc-800 rounded-xl px-3 text-[10px] outline-none"><button onclick="submitSocialProof('${id}', '${t.name}', ${t.reward})" class="bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase">Done</button></div></div>`;
-                    });
-                }
-            });
-        }
-
         window.submitSocialProof = (id, name, reward) => {
             const proof = document.getElementById('proof-'+id).value;
             if(!proof) return alert("Enter username!");
             push(ref(db, 'approvals'), { uid: auth.currentUser.uid, username: proof, taskName: name, reward: reward }).then(() => alert("Submitted!"));
         };
 
-        function loadHistory() {
-            onValue(ref(db, 'history/' + auth.currentUser.uid), (snap) => {
-                const list = document.getElementById('history-list');
+        function loadUserTasks() {
+            onValue(ref(db, 'social_jobs'), (snap) => {
+                const list = document.getElementById('user-task-list');
                 const data = snap.val(); list.innerHTML = '';
-                if(data) {
-                    Object.keys(data).reverse().forEach(id => {
-                        const h = data[id];
-                        const isMinus = h.type === 'Withdraw';
-                        list.innerHTML += `<div class="glass-card p-4 rounded-2xl flex justify-between border-l-2 ${isMinus ? 'border-red-500' : 'border-green-500'}">
-                            <div><p class="text-[10px] uppercase font-bold text-zinc-400">${h.type}</p><p class="text-[8px] text-zinc-600">${h.date}</p></div>
-                            <p class="font-black ${isMinus ? 'text-red-500' : 'text-green-500'}">${isMinus ? '-' : '+'}${h.amount}</p>
-                        </div>`;
-                    });
-                }
+                if(data) Object.keys(data).forEach(id => {
+                    const t = data[id];
+                    list.innerHTML += `<div class="glass-card p-5 rounded-3xl"><h4 class="font-bold text-sm mb-1">${t.name}</h4><p class="text-[10px] text-green-500 font-bold mb-4">+${t.reward} Coins</p><div class="flex gap-2"><button onclick="window.open('${t.link}', '_blank')" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Follow</button><input id="proof-${id}" type="text" placeholder="Username" class="flex-1 bg-black border border-zinc-800 rounded-xl px-3 text-[10px] outline-none"><button onclick="submitSocialProof('${id}', '${t.name}', ${t.reward})" class="bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase">Done</button></div></div>`;
+                });
             });
         }
 
