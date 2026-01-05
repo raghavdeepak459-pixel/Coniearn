@@ -13,9 +13,8 @@
         .task-card { transition: 0.3s; border-radius: 24px; overflow: hidden; }
         .task-card:active { scale: 0.98; background: rgba(255,255,255,0.06); }
         .btn-premium { background: linear-gradient(90deg, #FFD700, #FFA500); color: black; font-weight: 900; }
-        .btn-disabled { background: #222 !important; color: #555 !important; cursor: not-allowed; }
         .nav-active { color: #FFD700; filter: drop-shadow(0 0 5px #FFD700); }
-        input { background: #111 !important; border: 1px solid #222 !important; color: white !important; }
+        input, textarea { background: #111 !important; border: 1px solid #222 !important; color: white !important; }
         
         @keyframes float {
             0% { transform: translateY(0px) rotate(0deg); }
@@ -23,16 +22,25 @@
             100% { transform: translateY(0px) rotate(0deg); }
         }
         .floating-coin { animation: float 3s ease-in-out infinite; }
-        
         .earn-btn { transition: 0.3s; border-radius: 20px; text-align: center; padding: 15px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .earn-btn:active { scale: 0.95; background: rgba(255,255,255,0.1); }
 
         #scratch-container { position: relative; width: 280px; height: 280px; margin: 0 auto; user-select: none; }
         #scratch-canvas { position: absolute; top: 0; left: 0; cursor: crosshair; z-index: 2; border-radius: 20px; }
-        .scratch-prize { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111; border: 2px solid rgba(234, 179, 8, 0.2); rounded-[20px] z-1; }
+        .scratch-prize { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; items-center; justify-content: center; bg-zinc-900; border: 2px solid rgba(255,215,0,0.2); rounded: 20px; z-index: 1; }
+        
+        .notif-banner { background: linear-gradient(90deg, #FFD700, #FFA500); color: black; animation: slideDown 0.5s ease-out; }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body class="pb-28 p-4">
+
+    <div id="notif-area" class="fixed top-0 left-0 right-0 z-[1000] hidden-screen">
+        <div class="notif-banner p-4 flex justify-between items-center shadow-2xl font-black text-[11px] uppercase tracking-wider">
+            <div class="flex items-center gap-3"><span>📢</span><p id="notif-text"></p></div>
+            <button onclick="closeNotif()" class="bg-black/10 px-3 py-1 rounded-lg">Dismiss</button>
+        </div>
+    </div>
 
     <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center text-center px-6">
         <div class="w-20 h-20 bg-yellow-500 rounded-3xl rotate-12 flex items-center justify-center mb-6 shadow-2xl shadow-yellow-500/20 floating-coin">
@@ -47,11 +55,11 @@
 
     <div id="app-interface" class="hidden-screen max-w-md mx-auto">
         <div class="flex justify-between items-center mb-8 px-2">
-            <div class="flex items-center gap-3 bg-white/5 p-1 pr-4 rounded-full border border-white/10">
+            <div onclick="openScreen('profile-screen')" class="flex items-center gap-3 bg-white/5 p-1 pr-4 rounded-full border border-white/10 cursor-pointer">
                 <img id="user-photo" src="" class="w-9 h-9 rounded-full border-2 border-yellow-500">
                 <div>
                     <h2 id="user-name" class="text-[11px] font-black text-white truncate w-24">User</h2>
-                    <p class="text-[8px] text-green-500 font-bold uppercase tracking-tighter">[x] Online</p>
+                    <p class="text-[8px] text-green-500 font-bold uppercase tracking-tighter">● Profile</p>
                 </div>
             </div>
             <button id="admin-btn" onclick="openScreen('admin-panel')" class="hidden bg-red-500/10 text-red-500 text-[9px] font-black px-4 py-2 rounded-2xl border border-red-500/20">ADMIN</button>
@@ -67,9 +75,7 @@
                     <span class="text-yellow-500 font-black text-sm mb-3">COINS</span>
                 </div>
                 <div class="flex items-center justify-center gap-3 bg-black/40 px-6 py-3 rounded-3xl border border-white/5 mx-auto w-fit">
-                    <div class="w-8 h-8 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-500/30">
-                        <span class="text-green-500 font-bold text-lg">₹</span>
-                    </div>
+                    <div class="w-8 h-8 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-500/30"><span class="text-green-500 font-bold text-lg">₹</span></div>
                     <div class="text-left">
                         <p class="text-[8px] text-zinc-500 font-black uppercase leading-none">Cash Value</p>
                         <p class="text-xl font-black text-green-500">₹<span id="rupees">0</span>.00</p>
@@ -86,13 +92,6 @@
             <div onclick="spinWheel()" class="earn-btn glass-card border-l-2 border-purple-500">
                 <span class="text-2xl">🎡</span>
                 <p class="text-[11px] font-black mt-1 uppercase">Spin & Win</p>
-            </div>
-            <div onclick="openScreen('refer-screen')" class="earn-btn glass-card border-l-2 border-blue-500 col-span-2 flex items-center justify-center gap-4">
-                <span class="text-2xl">👥</span>
-                <div class="text-left">
-                    <p class="text-[11px] font-black uppercase">Refer & Earn</p>
-                    <p class="text-[8px] text-zinc-400">Invite friends & get 100 Coins</p>
-                </div>
             </div>
         </div>
 
@@ -113,47 +112,33 @@
         <div id="user-task-list" class="space-y-4 mb-10"></div>
     </div>
 
-    <div id="withdraw-screen" class="fixed inset-0 bg-black z-50 p-8 hidden-screen overflow-y-auto">
-        <button onclick="closeScreen('withdraw-screen')" class="text-zinc-500 font-bold mb-10 text-[10px] uppercase">← Back</button>
-        <h2 class="text-3xl font-black mb-4 italic text-yellow-500">Withdrawal</h2>
-        
-        <div class="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-2xl mb-6">
-            <p class="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">Minimum Limit</p>
-            <p class="text-xs text-white mt-1">आपको पैसे निकालने के लिए कम से कम **10,000 Coins (₹100)** की आवश्यकता है।</p>
-        </div>
-
-        <div class="glass-card p-6 rounded-3xl mb-8">
-            <p class="text-[10px] text-zinc-500 uppercase font-bold mb-1">UPI ID (PhonePe/GPay/Paytm)</p>
-            <input id="upi-id" type="text" placeholder="yourname@upi" class="w-full p-5 rounded-2xl mb-4 text-center font-bold outline-none border border-white/10">
-            
-            <p class="text-[10px] text-zinc-500 uppercase font-bold mb-1">Coins to Redeem</p>
-            <input id="withdraw-amt" type="number" placeholder="Min 10000" class="w-full p-5 rounded-2xl text-center font-bold outline-none border border-white/10">
-        </div>
-        
-        <button id="withdraw-btn" onclick="submitWithdraw()" class="w-full btn-premium py-5 rounded-3xl font-black text-sm uppercase shadow-lg shadow-yellow-500/20">Request ₹100 Payout</button>
-    </div>
-
-    <div id="refer-screen" class="fixed inset-0 bg-black z-[100] p-6 hidden-screen flex flex-col">
-        <button onclick="closeScreen('refer-screen')" class="text-zinc-500 font-bold mb-10 text-[10px] uppercase">← Back</button>
-        <h2 class="text-3xl font-black mb-2 italic text-blue-500">REFER FRIENDS</h2>
-        <div class="glass-card p-6 rounded-3xl text-center mt-10">
-            <p class="text-[10px] text-zinc-500 uppercase mb-2">Your Referral Code</p>
-            <h3 id="my-refer-code" class="text-4xl font-black tracking-widest text-white mb-6">...</h3>
-            <button onclick="shareReferral()" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-xs">Share on WhatsApp</button>
+    <div id="profile-screen" class="fixed inset-0 bg-black z-[150] p-8 hidden-screen overflow-y-auto">
+        <button onclick="closeScreen('profile-screen')" class="text-zinc-500 font-bold mb-10 text-[10px] uppercase">← Back</button>
+        <h2 class="text-3xl font-black mb-10 italic text-yellow-500">My Profile</h2>
+        <div class="space-y-6">
+            <div class="glass-card p-6 rounded-3xl">
+                <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">Display Name</p>
+                <input id="edit-name" type="text" class="w-full p-4 rounded-2xl text-xs font-bold outline-none">
+            </div>
+            <div class="glass-card p-6 rounded-3xl">
+                <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">Saved UPI ID</p>
+                <input id="edit-upi" type="text" placeholder="example@upi" class="w-full p-4 rounded-2xl text-xs font-bold outline-none">
+            </div>
+            <button onclick="saveProfile()" class="w-full bg-white text-black py-5 rounded-3xl font-black text-xs uppercase">Update Profile</button>
         </div>
     </div>
 
     <div id="scratch-screen" class="fixed inset-0 bg-black z-[150] p-6 hidden-screen flex flex-col items-center justify-center">
         <button onclick="closeScreen('scratch-screen')" class="absolute top-10 left-6 text-zinc-500 font-bold text-[10px] uppercase">← Back</button>
-        <h2 class="text-2xl font-black text-yellow-500 mb-2 uppercase italic">Lucky Scratch</h2>
-        <div id="scratch-container">
-            <div class="scratch-prize">
-                <h3 class="text-4xl font-black text-white mb-1 tracking-tighter" id="scratch-win-text">0</h3>
+        <h2 class="text-2xl font-black text-yellow-500 mb-2 uppercase italic text-center">Lucky Scratch</h2>
+        <div id="scratch-container" class="mt-8">
+            <div class="scratch-prize text-center">
+                <h3 class="text-4xl font-black text-white" id="scratch-win-text">0</h3>
                 <p class="text-[10px] font-black text-yellow-500 uppercase tracking-widest">Coins Won!</p>
             </div>
             <canvas id="scratch-canvas" width="280" height="280"></canvas>
         </div>
-        <button id="collect-scratch-btn" class="mt-10 hidden-screen bg-white text-black px-12 py-4 rounded-2xl font-black uppercase text-xs">Collect Prize</button>
+        <button id="collect-scratch-btn" onclick="collectScratch()" class="mt-10 hidden-screen bg-white text-black px-12 py-4 rounded-2xl font-black uppercase text-xs">Collect Prize</button>
     </div>
 
     <div id="admin-panel" class="fixed inset-0 bg-[#050505] z-[200] p-6 overflow-y-auto hidden-screen">
@@ -161,23 +146,44 @@
             <h2 class="text-xl font-black text-red-600 uppercase">Admin Control</h2>
             <button onclick="closeScreen('admin-panel')" class="bg-zinc-900 px-5 py-2 rounded-2xl text-[10px] font-black">CLOSE</button>
         </div>
-        <div class="space-y-6">
-            <div class="glass-card p-6 rounded-[30px] space-y-3">
-                <h3 class="text-xs font-bold text-blue-500 uppercase">New Task</h3>
-                <input id="task-name" type="text" placeholder="Task Name" class="w-full p-4 rounded-xl text-xs">
-                <input id="task-link" type="text" placeholder="URL Link" class="w-full p-4 rounded-xl text-xs">
-                <input id="task-reward" type="number" placeholder="Reward Coins" class="w-full p-4 rounded-xl text-xs">
-                <button onclick="addNewTask()" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs">ADD TASK</button>
-            </div>
-            <h3 class="text-xs font-bold text-zinc-500 uppercase">Redeem Requests (₹100+)</h3>
-            <div id="admin-payout-list" class="space-y-3"></div>
+        <div class="space-y-10">
+            <section class="glass-card p-6 rounded-[30px] space-y-3">
+                <h3 class="text-xs font-bold text-yellow-500 uppercase">Send Alert to All</h3>
+                <textarea id="admin-notif-msg" placeholder="Message for users..." class="w-full p-4 rounded-2xl text-xs outline-none min-h-[80px]"></textarea>
+                <button onclick="sendGlobalNotif()" class="w-full bg-yellow-500 text-black py-3 rounded-2xl font-black text-[10px] uppercase">Send Global Alert</button>
+            </section>
+            <section class="glass-card p-6 rounded-[30px] space-y-3">
+                <h3 class="text-xs font-bold text-blue-500 mb-2 uppercase">Add New Task</h3>
+                <input id="task-name" type="text" placeholder="Task Name" class="w-full p-4 rounded-2xl text-xs outline-none">
+                <input id="task-link" type="text" placeholder="URL Link" class="w-full p-4 rounded-2xl text-xs outline-none">
+                <input id="task-reward" type="number" placeholder="Reward Coins" class="w-full p-4 rounded-2xl text-xs outline-none">
+                <button onclick="addOrUpdateTask()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase">Publish</button>
+            </section>
+            <section id="admin-payout-list" class="space-y-3"></section>
+            <section id="admin-task-list" class="space-y-2"></section>
         </div>
+    </div>
+
+    <div id="withdraw-screen" class="fixed inset-0 bg-black z-50 p-8 hidden-screen">
+        <button onclick="closeScreen('withdraw-screen')" class="text-zinc-500 font-bold mb-10 text-[10px] uppercase">← Back</button>
+        <h2 class="text-3xl font-black mb-4 italic text-yellow-500">Withdrawal</h2>
+        <div class="glass-card p-6 rounded-3xl mb-8">
+            <p class="text-[10px] text-zinc-500 uppercase font-bold mb-1">UPI Address</p>
+            <input id="upi-id" type="text" placeholder="9876543210@paytm" class="w-full p-5 rounded-2xl mb-4 text-center font-bold outline-none border">
+        </div>
+        <button onclick="submitWithdraw()" class="w-full btn-premium py-5 rounded-3xl font-black text-sm uppercase">Request Payout</button>
+    </div>
+
+    <div id="history-screen" class="fixed inset-0 bg-black z-50 p-6 overflow-y-auto hidden-screen">
+        <button onclick="closeScreen('history-screen')" class="text-zinc-500 font-bold mb-8 text-[10px] uppercase">← Back</button>
+        <h2 class="text-3xl font-black mb-8 italic text-white">History</h2>
+        <div id="history-list" class="space-y-3"></div>
     </div>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/80 border-t border-zinc-900 p-4 flex justify-around items-center z-40 backdrop-blur-xl">
         <button onclick="location.reload()" class="flex flex-col items-center gap-1 text-[10px] font-bold nav-active">🏠<span>Home</span></button>
+        <button onclick="openScreen('history-screen')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-zinc-500">📜<span>History</span></button>
         <button onclick="openScreen('withdraw-screen')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-zinc-500">💳<span>Wallet</span></button>
-        <button onclick="openScreen('refer-screen')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-zinc-500">👥<span>Refer</span></button>
         <button onclick="logout()" class="flex flex-col items-center gap-1 text-[10px] font-bold text-red-900">🔒<span>Logout</span></button>
     </nav>
 
@@ -199,128 +205,114 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
         const ADMIN_EMAIL = "draghav349@gmail.com";
-        const MIN_REDEEM_COINS = 10000; // ₹100
+        let taskCompletedCount = 0;
 
-        window.loginWithGoogle = () => signInWithPopup(auth, provider);
-        window.logout = () => signOut(auth).then(() => location.reload());
-
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden-screen');
                 document.getElementById('app-interface').classList.remove('hidden-screen');
-                document.getElementById('user-name').innerText = user.displayName;
+                
+                // Fetch User Profile
+                const userSnap = await get(ref(db, 'users/' + user.uid));
+                const userData = userSnap.val() || {};
+                document.getElementById('user-name').innerText = userData.name || user.displayName;
+                document.getElementById('edit-name').value = userData.name || user.displayName;
+                document.getElementById('edit-upi').value = userData.upi || "";
+                if(document.getElementById('upi-id')) document.getElementById('upi-id').value = userData.upi || "";
                 document.getElementById('user-photo').src = user.photoURL;
-                document.getElementById('my-refer-code').innerText = user.uid.substring(0,6).toUpperCase();
 
                 if(user.email === ADMIN_EMAIL) {
                     document.getElementById('admin-btn').classList.remove('hidden');
-                    loadAdminPayouts();
+                    loadAdminPanel();
                 }
+
+                // Global Notification Listen
+                onValue(ref(db, 'global_notification'), snap => {
+                    const data = snap.val();
+                    if(data && data.msg) {
+                        document.getElementById('notif-text').innerText = data.msg;
+                        document.getElementById('notif-area').classList.remove('hidden-screen');
+                    }
+                });
 
                 onValue(ref(db, 'wallets/' + user.uid), s => {
                     const v = s.val() || 0;
                     document.getElementById('balance').innerText = v;
                     document.getElementById('rupees').innerText = Math.floor(v/100);
-                    
-                    // Button UI Update
-                    const wBtn = document.getElementById('withdraw-btn');
-                    if(v < MIN_REDEEM_COINS) {
-                        wBtn.classList.add('btn-disabled');
-                        wBtn.innerText = `Need ${MIN_REDEEM_COINS - v} more coins`;
-                    } else {
-                        wBtn.classList.remove('btn-disabled');
-                        wBtn.innerText = "Request ₹100 Payout";
-                    }
+                });
+                
+                onValue(ref(db, 'scratchProgress/' + user.uid), s => {
+                    taskCompletedCount = s.val() || 0;
+                    updateScratchUI();
                 });
 
-                onValue(ref(db, 'scratchProgress/' + user.uid), s => updateScratchUI(s.val() || 0));
                 loadUserTasks();
+                loadHistory();
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden-screen');
             }
         });
 
-        window.openScreen = (id) => document.getElementById(id).classList.remove('hidden-screen');
-        window.closeScreen = (id) => document.getElementById(id).classList.add('hidden-screen');
-
-        window.addCoins = (amt, type) => {
-            runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), c => (c || 0) + amt);
-            push(ref(db, 'history/' + auth.currentUser.uid), { type, amt, date: new Date().toLocaleString() });
+        // PROFILE FUNCTIONS
+        window.saveProfile = async () => {
+            const name = document.getElementById('edit-name').value;
+            const upi = document.getElementById('edit-upi').value;
+            await update(ref(db, 'users/' + auth.currentUser.uid), { name, upi });
+            alert("Profile Updated!");
+            location.reload();
         };
 
-        // WITHDRAW LOGIC (₹100)
-        window.submitWithdraw = () => {
-            const upi = document.getElementById('upi-id').value;
-            const amt = parseInt(document.getElementById('withdraw-amt').value);
-            const bal = parseInt(document.getElementById('balance').innerText);
+        window.closeNotif = () => document.getElementById('notif-area').classList.add('hidden-screen');
 
-            if(!upi.includes('@')) return alert("Valid UPI ID डालें!");
-            if(isNaN(amt) || amt < MIN_REDEEM_COINS) return alert("Minimum 10,000 Coins (₹100) अनिवार्य है!");
-            if(amt > bal) return alert("सिक्के कम हैं!");
+        // SPIN LOGIC (10 PER DAY)
+        window.spinWheel = async () => {
+            const uid = auth.currentUser.uid;
+            const now = Date.now();
+            const dayInMs = 24 * 60 * 60 * 1000;
+            const snap = await get(ref(db, `spins/${uid}`));
+            let spinData = snap.val() || { count: 0, lastReset: now };
 
-            addCoins(-amt, "Withdrawal Request");
-            push(ref(db, 'payouts'), {
-                uid: auth.currentUser.uid,
-                email: auth.currentUser.email,
-                upi, amt, status: 'Pending', date: new Date().toLocaleString()
-            });
-            alert("अनुरोध भेज दिया गया है! 24 घंटे में पैसे मिल जायेंगे।");
-            closeScreen('withdraw-screen');
-        };
+            if (now - spinData.lastReset > dayInMs) spinData = { count: 0, lastReset: now };
+            if (spinData.count >= 10) return alert("Today's 10 spins limit reached!");
 
-        // Tasks & Other Functions
-        window.dailyCheckIn = async () => {
-            const d = new Date().toLocaleDateString();
-            const last = await get(ref(db, `checks/${auth.currentUser.uid}`));
-            if(last.val() === d) return alert("Already claimed today!");
-            set(ref(db, `checks/${auth.currentUser.uid}`), d);
-            addCoins(50, "Daily Reward");
-            alert("50 Coins added!");
-        };
-
-        window.spinWheel = () => {
             const win = [10, 20, 50, 100][Math.floor(Math.random()*4)];
-            addCoins(win, "Spin Reward");
-            alert("Won " + win + " coins!");
+            spinData.count += 1;
+            await set(ref(db, `spins/${uid}`), spinData);
+            addCoins(win, "Wheel Win");
+            alert(`Won ${win} coins! Spins left: ${10 - spinData.count}`);
         };
 
-        window.shareReferral = () => {
-            const code = auth.currentUser.uid.substring(0,6).toUpperCase();
-            window.open(`https://wa.me/?text=Earn ₹100 Daily with Studio Cash! Use my code: ${code}`);
+        // ADMIN NOTIFICATION
+        window.sendGlobalNotif = () => {
+            const msg = document.getElementById('admin-notif-msg').value;
+            if(msg) set(ref(db, 'global_notification'), { msg, time: Date.now() }).then(() => alert("Sent!"));
         };
 
-        function updateScratchUI(count) {
+        // ... [REST OF SCRATCH CARD AND TASK LOGIC - NO CHANGES] ...
+        function updateScratchUI() {
             const btn = document.getElementById('scratch-unlock-btn');
-            document.getElementById('task-progress').innerText = `${count}/3`;
-            if(count >= 3) btn.classList.remove('opacity-50', 'grayscale', 'pointer-events-none');
+            const status = document.getElementById('scratch-status');
+            const prog = document.getElementById('task-progress');
+            prog.innerText = `${taskCompletedCount}/3`;
+            if(taskCompletedCount >= 3) {
+                btn.style.opacity = "1"; btn.style.filter = "none"; btn.style.pointerEvents = "auto";
+                status.innerText = "Card Unlocked! Click to Scratch";
+            }
         }
 
-        window.openScratchScreen = () => {
-            initScratchCard();
-            openScreen('scratch-screen');
-        };
+        window.openScratchScreen = () => { initScratchCard(); openScreen('scratch-screen'); };
 
+        let currentScratchWin = 0;
         function initScratchCard() {
             const canvas = document.getElementById('scratch-canvas');
             const ctx = canvas.getContext('2d');
-            const win = Math.floor(Math.random() * 80) + 20;
-            document.getElementById('scratch-win-text').innerText = win;
+            currentScratchWin = Math.floor(Math.random() * 150) + 50;
+            document.getElementById('scratch-win-text').innerText = currentScratchWin;
             document.getElementById('collect-scratch-btn').classList.add('hidden-screen');
-            document.getElementById('collect-scratch-btn').onclick = () => {
-                addCoins(win, "Scratch Card");
-                set(ref(db, 'scratchProgress/' + auth.currentUser.uid), 0);
-                closeScreen('scratch-screen');
-            };
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = '#444'; ctx.fillRect(0,0,280,280);
+            ctx.fillStyle = '#444'; ctx.fillRect(0, 0, 280, 280);
+            ctx.fillStyle = '#222'; ctx.font = "20px Inter"; ctx.fillText("SCRATCH HERE", 70, 145);
+            let isDrawing = false;
             const scratch = (e) => {
+                if(!isDrawing) return;
                 const rect = canvas.getBoundingClientRect();
-                const x = (e.pageX || e.touches[0].pageX) - rect.left;
-                const y = (e.pageY || e.touches[0].pageY) - rect.top;
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath(); ctx.arc(x,y,30,0,Math.PI*2); ctx.fill();
-                const data = ctx.getImageData(0,0,280,280).data;
-                let clear = 0;
-                for(let i=3; i<data.length; i+=4) if(data[i]===0) clear++;
-                if(clear > (280*280)*0.5) document.getElementById('collect-scratch-btn').classList.remove('hidden-screen');
-            };
-            canvas.ontouchmove = scratch;
-            canvas.onmousemove = (e) => { 
+                const x = (e.pageX || (e.touches ? e.to
