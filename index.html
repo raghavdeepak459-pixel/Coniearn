@@ -27,7 +27,7 @@
 
         #scratch-container { position: relative; width: 280px; height: 280px; margin: 0 auto; user-select: none; }
         #scratch-canvas { position: absolute; top: 0; left: 0; cursor: crosshair; z-index: 2; border-radius: 20px; }
-        .scratch-prize { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; items-center; justify-content: center; bg-zinc-900; border: 2px solid rgba(255,215,0,0.2); rounded: 20px; z-index: 1; }
+        .scratch-prize { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; items-center; justify-content: center; background: #111; border: 2px solid rgba(255,215,0,0.2); rounded: 20px; z-index: 1; }
         
         .notif-banner { background: linear-gradient(90deg, #FFD700, #FFA500); color: black; animation: slideDown 0.5s ease-out; }
         @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
@@ -38,7 +38,7 @@
     <div id="notif-area" class="fixed top-0 left-0 right-0 z-[1000] hidden-screen">
         <div class="notif-banner p-4 flex justify-between items-center shadow-2xl font-black text-[11px] uppercase tracking-wider">
             <div class="flex items-center gap-3"><span>📢</span><p id="notif-text"></p></div>
-            <button onclick="closeNotif()" class="bg-black/10 px-3 py-1 rounded-lg">Dismiss</button>
+            <button onclick="closeNotif()" class="bg-black/10 px-3 py-1 rounded-lg">OK</button>
         </div>
     </div>
 
@@ -59,7 +59,7 @@
                 <img id="user-photo" src="" class="w-9 h-9 rounded-full border-2 border-yellow-500">
                 <div>
                     <h2 id="user-name" class="text-[11px] font-black text-white truncate w-24">User</h2>
-                    <p class="text-[8px] text-green-500 font-bold uppercase tracking-tighter">● Profile</p>
+                    <p class="text-[8px] text-green-500 font-bold uppercase tracking-tighter">● Edit Profile</p>
                 </div>
             </div>
             <button id="admin-btn" onclick="openScreen('admin-panel')" class="hidden bg-red-500/10 text-red-500 text-[9px] font-black px-4 py-2 rounded-2xl border border-red-500/20">ADMIN</button>
@@ -75,7 +75,9 @@
                     <span class="text-yellow-500 font-black text-sm mb-3">COINS</span>
                 </div>
                 <div class="flex items-center justify-center gap-3 bg-black/40 px-6 py-3 rounded-3xl border border-white/5 mx-auto w-fit">
-                    <div class="w-8 h-8 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-500/30"><span class="text-green-500 font-bold text-lg">₹</span></div>
+                    <div class="w-8 h-8 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-500/30">
+                        <span class="text-green-500 font-bold text-lg">₹</span>
+                    </div>
                     <div class="text-left">
                         <p class="text-[8px] text-zinc-500 font-black uppercase leading-none">Cash Value</p>
                         <p class="text-xl font-black text-green-500">₹<span id="rupees">0</span>.00</p>
@@ -118,13 +120,13 @@
         <div class="space-y-6">
             <div class="glass-card p-6 rounded-3xl">
                 <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">Display Name</p>
-                <input id="edit-name" type="text" class="w-full p-4 rounded-2xl text-xs font-bold outline-none">
+                <input id="edit-name" type="text" class="w-full p-4 rounded-2xl text-xs font-bold outline-none border">
             </div>
             <div class="glass-card p-6 rounded-3xl">
-                <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">Saved UPI ID</p>
-                <input id="edit-upi" type="text" placeholder="example@upi" class="w-full p-4 rounded-2xl text-xs font-bold outline-none">
+                <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">Payout UPI ID</p>
+                <input id="edit-upi" type="text" placeholder="example@upi" class="w-full p-4 rounded-2xl text-xs font-bold outline-none border">
             </div>
-            <button onclick="saveProfile()" class="w-full bg-white text-black py-5 rounded-3xl font-black text-xs uppercase">Update Profile</button>
+            <button onclick="saveProfile()" class="w-full bg-white text-black py-5 rounded-3xl font-black text-xs uppercase shadow-xl active:scale-95 transition">Update Profile</button>
         </div>
     </div>
 
@@ -143,24 +145,24 @@
 
     <div id="admin-panel" class="fixed inset-0 bg-[#050505] z-[200] p-6 overflow-y-auto hidden-screen">
         <div class="flex justify-between items-center mb-10">
-            <h2 class="text-xl font-black text-red-600 uppercase">Admin Control</h2>
+            <h2 class="text-xl font-black text-red-600 uppercase italic">Admin Console</h2>
             <button onclick="closeScreen('admin-panel')" class="bg-zinc-900 px-5 py-2 rounded-2xl text-[10px] font-black">CLOSE</button>
         </div>
-        <div class="space-y-10">
+        <div class="space-y-8">
             <section class="glass-card p-6 rounded-[30px] space-y-3">
-                <h3 class="text-xs font-bold text-yellow-500 uppercase">Send Alert to All</h3>
-                <textarea id="admin-notif-msg" placeholder="Message for users..." class="w-full p-4 rounded-2xl text-xs outline-none min-h-[80px]"></textarea>
-                <button onclick="sendGlobalNotif()" class="w-full bg-yellow-500 text-black py-3 rounded-2xl font-black text-[10px] uppercase">Send Global Alert</button>
+                <h3 class="text-xs font-bold text-yellow-500 uppercase">📢 Push Notification</h3>
+                <textarea id="admin-notif-msg" placeholder="Message for all users..." class="w-full p-4 rounded-2xl text-xs outline-none min-h-[80px]"></textarea>
+                <button onclick="sendGlobalNotif()" class="w-full bg-yellow-500 text-black py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest">Broadcast Message</button>
             </section>
+            
             <section class="glass-card p-6 rounded-[30px] space-y-3">
-                <h3 class="text-xs font-bold text-blue-500 mb-2 uppercase">Add New Task</h3>
+                <h3 class="text-xs font-bold text-blue-500 uppercase">⚡ Create New Task</h3>
                 <input id="task-name" type="text" placeholder="Task Name" class="w-full p-4 rounded-2xl text-xs outline-none">
                 <input id="task-link" type="text" placeholder="URL Link" class="w-full p-4 rounded-2xl text-xs outline-none">
                 <input id="task-reward" type="number" placeholder="Reward Coins" class="w-full p-4 rounded-2xl text-xs outline-none">
-                <button onclick="addOrUpdateTask()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase">Publish</button>
+                <button onclick="addOrUpdateTask()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase">Publish Task</button>
             </section>
             <section id="admin-payout-list" class="space-y-3"></section>
-            <section id="admin-task-list" class="space-y-2"></section>
         </div>
     </div>
 
@@ -170,13 +172,14 @@
         <div class="glass-card p-6 rounded-3xl mb-8">
             <p class="text-[10px] text-zinc-500 uppercase font-bold mb-1">UPI Address</p>
             <input id="upi-id" type="text" placeholder="9876543210@paytm" class="w-full p-5 rounded-2xl mb-4 text-center font-bold outline-none border">
+            <p class="text-[8px] text-zinc-500 text-center">Min. Withdraw: 1000 Coins (₹10)</p>
         </div>
         <button onclick="submitWithdraw()" class="w-full btn-premium py-5 rounded-3xl font-black text-sm uppercase">Request Payout</button>
     </div>
 
     <div id="history-screen" class="fixed inset-0 bg-black z-50 p-6 overflow-y-auto hidden-screen">
         <button onclick="closeScreen('history-screen')" class="text-zinc-500 font-bold mb-8 text-[10px] uppercase">← Back</button>
-        <h2 class="text-3xl font-black mb-8 italic text-white">History</h2>
+        <h2 class="text-3xl font-black mb-8 italic">History</h2>
         <div id="history-list" class="space-y-3"></div>
     </div>
 
@@ -192,6 +195,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue, set, push, remove, update, runTransaction, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyA7t1eGYytS6hSbFjNM5uoRuSWHMlueYZo",
             authDomain: "studio-chat-5ed18.firebaseapp.com",
@@ -207,12 +211,13 @@
         const ADMIN_EMAIL = "draghav349@gmail.com";
         let taskCompletedCount = 0;
 
+        // AUTH STATE
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden-screen');
                 document.getElementById('app-interface').classList.remove('hidden-screen');
                 
-                // Fetch User Profile
+                // Fetch/Set Profile
                 const userSnap = await get(ref(db, 'users/' + user.uid));
                 const userData = userSnap.val() || {};
                 document.getElementById('user-name').innerText = userData.name || user.displayName;
@@ -226,8 +231,8 @@
                     loadAdminPanel();
                 }
 
-                // Global Notification Listen
-                onValue(ref(db, 'global_notification'), snap => {
+                // Global Notification listener
+                onValue(ref(db, 'global_notification'), (snap) => {
                     const data = snap.val();
                     if(data && data.msg) {
                         document.getElementById('notif-text').innerText = data.msg;
@@ -250,15 +255,17 @@
                 loadHistory();
             } else {
                 document.getElementById('login-screen').classList.remove('hidden-screen');
+                document.getElementById('app-interface').classList.add('hidden-screen');
             }
         });
 
-        // PROFILE FUNCTIONS
+        // PROFILE LOGIC
         window.saveProfile = async () => {
             const name = document.getElementById('edit-name').value;
             const upi = document.getElementById('edit-upi').value;
+            if(!name) return alert("Please enter name");
             await update(ref(db, 'users/' + auth.currentUser.uid), { name, upi });
-            alert("Profile Updated!");
+            alert("Profile Updated! ✨");
             location.reload();
         };
 
@@ -273,22 +280,22 @@
             let spinData = snap.val() || { count: 0, lastReset: now };
 
             if (now - spinData.lastReset > dayInMs) spinData = { count: 0, lastReset: now };
-            if (spinData.count >= 10) return alert("Today's 10 spins limit reached!");
+            if (spinData.count >= 10) return alert("Daily 10 spins limit reached! 🛑");
 
             const win = [10, 20, 50, 100][Math.floor(Math.random()*4)];
             spinData.count += 1;
             await set(ref(db, `spins/${uid}`), spinData);
             addCoins(win, "Wheel Win");
-            alert(`Won ${win} coins! Spins left: ${10 - spinData.count}`);
+            alert(`🎉 Won ${win} coins! Spins left: ${10 - spinData.count}`);
         };
 
         // ADMIN NOTIFICATION
         window.sendGlobalNotif = () => {
             const msg = document.getElementById('admin-notif-msg').value;
-            if(msg) set(ref(db, 'global_notification'), { msg, time: Date.now() }).then(() => alert("Sent!"));
+            if(msg) set(ref(db, 'global_notification'), { msg, time: Date.now() }).then(() => alert("Broadcasted!"));
         };
 
-        // ... [REST OF SCRATCH CARD AND TASK LOGIC - NO CHANGES] ...
+        // SCRATCH CARD SYSTEM
         function updateScratchUI() {
             const btn = document.getElementById('scratch-unlock-btn');
             const status = document.getElementById('scratch-status');
@@ -297,6 +304,7 @@
             if(taskCompletedCount >= 3) {
                 btn.style.opacity = "1"; btn.style.filter = "none"; btn.style.pointerEvents = "auto";
                 status.innerText = "Card Unlocked! Click to Scratch";
+                status.classList.add('text-yellow-500');
             }
         }
 
@@ -309,10 +317,4 @@
             currentScratchWin = Math.floor(Math.random() * 150) + 50;
             document.getElementById('scratch-win-text').innerText = currentScratchWin;
             document.getElementById('collect-scratch-btn').classList.add('hidden-screen');
-            ctx.fillStyle = '#444'; ctx.fillRect(0, 0, 280, 280);
-            ctx.fillStyle = '#222'; ctx.font = "20px Inter"; ctx.fillText("SCRATCH HERE", 70, 145);
-            let isDrawing = false;
-            const scratch = (e) => {
-                if(!isDrawing) return;
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.pageX || (e.touches ? e.to
+    
