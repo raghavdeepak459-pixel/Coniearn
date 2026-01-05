@@ -3,73 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Cash - Google Login Fix</title>
+    <title>Studio Cash Pro - Earn & Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background: #000; color: white; font-family: 'Inter', sans-serif; }
-        .glass-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(15px); }
         .hidden-screen { display: none !important; }
-        .btn-google { background: white; color: black; font-weight: 800; transition: 0.3s; }
-        .btn-google:hover { background: #f0f0f0; transform: translateY(-2px); }
+        .task-card { transition: 0.3s; border-radius: 24px; overflow: hidden; }
+        .task-card:active { scale: 0.98; background: rgba(255,255,255,0.06); }
+        .btn-premium { background: linear-gradient(90deg, #FFD700, #FFA500); color: black; font-weight: 900; }
+        .nav-active { color: #FFD700; filter: drop-shadow(0 0 5px #FFD700); }
+        input { background: #111 !important; border: 1px solid #222 !important; color: white !important; }
+        
+        /* Floating Animation for Coin */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .floating-coin { animation: float 3s ease-in-out infinite; }
+        
+        .earn-btn { transition: 0.3s; border-radius: 20px; text-align: center; padding: 15px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .earn-btn:active { scale: 0.95; background: rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="p-6">
+<body class="pb-28 p-4">
 
-    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center text-center">
-        <h1 class="text-4xl font-black italic text-yellow-500 mb-2">STUDIO_CASH</h1>
-        <p class="text-zinc-500 text-[10px] tracking-[4px] mb-12 uppercase font-bold">Earn Real Cash Daily</p>
-        
-        <div class="w-full max-w-xs space-y-4">
-            <button onclick="loginWithGoogle()" class="btn-google w-full py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-white/5">
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6">
-                Login with Google
-            </button>
-            <p id="auth-status" class="text-red-500 text-[11px] mt-4 font-bold"></p>
+    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center text-center px-6">
+        <div class="w-20 h-20 bg-yellow-500 rounded-3xl rotate-12 flex items-center justify-center mb-6 shadow-2xl shadow-yellow-500/20 floating-coin">
+            <span class="text-black text-4xl font-black -rotate-12">$</span>
         </div>
+        <h1 class="text-4xl font-black italic text-yellow-500 mb-2">STUDIO_CASH</h1>
+        <p class="text-zinc-500 text-[10px] tracking-[5px] mb-12 uppercase font-medium">Professional Earning Tool</p>
+        <button onclick="loginWithGoogle()" class="w-full max-w-xs bg-white text-black py-4 rounded-2xl font-black flex items-center justify-center gap-3 active:scale-95 transition shadow-xl">
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-6"> Login with Google
+        </button>
     </div>
 
     <div id="app-interface" class="hidden-screen max-w-md mx-auto">
-        <div class="flex justify-between items-center mb-10">
-            <div class="flex items-center gap-3">
-                <img id="user-photo" src="" class="w-10 h-10 rounded-full border-2 border-yellow-500">
+        <div class="flex justify-between items-center mb-8 px-2">
+            <div class="flex items-center gap-3 bg-white/5 p-1 pr-4 rounded-full border border-white/10">
+                <img id="user-photo" src="" class="w-9 h-9 rounded-full border-2 border-yellow-500">
                 <div>
-                    <h2 id="user-name" class="text-sm font-black">User</h2>
-                    <p class="text-[9px] text-zinc-500 uppercase tracking-widest">Active Member</p>
+                    <h2 id="user-name" class="text-[11px] font-black text-white truncate w-24">User</h2>
+                    <p class="text-[8px] text-green-500 font-bold uppercase tracking-tighter">● Online</p>
                 </div>
             </div>
-            <button onclick="logout()" class="text-[10px] font-bold text-red-500 bg-red-500/10 px-3 py-1 rounded-full">LOGOUT</button>
+            <button id="admin-btn" onclick="openScreen('admin-panel')" class="hidden bg-red-500/10 text-red-500 text-[9px] font-black px-4 py-2 rounded-2xl border border-red-500/20">ADMIN</button>
         </div>
 
-        <div class="glass-card p-10 rounded-[45px] text-center mb-8 border-yellow-500/20 shadow-2xl">
-            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-[3px] mb-2">Wallet Balance</p>
-            <div class="flex items-center justify-center gap-3">
-                <span class="text-4xl">🪙</span>
-                <h1 id="balance" class="text-6xl font-black tracking-tighter">0</h1>
+        <div class="relative mb-10 group">
+            <div class="absolute -inset-1 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-[45px] blur opacity-20 transition duration-1000"></div>
+            <div class="relative glass-card p-8 rounded-[40px] border border-white/10 overflow-hidden text-center">
+                <div class="absolute -right-4 -top-4 opacity-20 text-8xl floating-coin">🪙</div>
+                
+                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-[4px] mb-2">Wallet Balance</p>
+                <div class="flex items-end justify-center gap-2 mb-4">
+                    <h1 id="balance" class="text-7xl font-black tracking-tighter text-white">0</h1>
+                    <span class="text-yellow-500 font-black text-sm mb-3">COINS</span>
+                </div>
+
+                <div class="flex items-center justify-center gap-3 bg-black/40 px-6 py-3 rounded-3xl border border-white/5 mx-auto w-fit">
+                    <div class="w-8 h-8 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-500/30">
+                        <span class="text-green-500 font-bold text-lg">₹</span>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-[8px] text-zinc-500 font-black uppercase leading-none">Cash Value</p>
+                        <p class="text-xl font-black text-green-500">₹<span id="rupees">0</span>.00</p>
+                    </div>
+                </div>
             </div>
-            <p class="text-green-500 font-bold mt-4 text-sm">₹ <span id="rupees">0</span>.00</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-            <div class="glass-card p-6 rounded-[30px] border-b-4 border-blue-500">
-                <p class="text-[20px] mb-2">📱</p>
-                <h4 class="text-xs font-bold">Social Jobs</h4>
-                <p class="text-[9px] text-zinc-500 mt-1">Easy Follow Tasks</p>
+        <div class="grid grid-cols-2 gap-3 mb-8">
+            <div onclick="dailyCheckIn()" class="earn-btn glass-card border-l-2 border-orange-500">
+                <span class="text-2xl">📅</span>
+                <p class="text-[11px] font-black mt-1 uppercase">Daily Gift</p>
             </div>
-            <div class="glass-card p-6 rounded-[30px] border-b-4 border-yellow-500">
-                <p class="text-[20px] mb-2">🎬</p>
-                <h4 class="text-xs font-bold">Watch Ads</h4>
-                <p class="text-[9px] text-zinc-500 mt-1">Earn 50 Coins/Ad</p>
+            <div onclick="spinWheel()" class="earn-btn glass-card border-l-2 border-purple-500">
+                <span class="text-2xl">🎡</span>
+                <p class="text-[11px] font-black mt-1 uppercase">Spin & Win</p>
             </div>
+        </div>
+
+        <h3 class="text-[11px] font-black text-zinc-500 mb-5 uppercase tracking-widest flex items-center gap-2">
+            <span class="w-8 h-[1px] bg-zinc-800"></span> Live Tasks <span class="w-8 h-[1px] bg-zinc-800"></span>
+        </h3>
+        <div id="user-task-list" class="space-y-4 mb-10"></div>
+    </div>
+
+    <div id="admin-panel" class="fixed inset-0 bg-[#050505] z-[200] p-6 overflow-y-auto hidden-screen">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-xl font-black text-red-600 uppercase">Admin Control</h2>
+            <button onclick="closeScreen('admin-panel')" class="bg-zinc-900 px-5 py-2 rounded-2xl text-[10px] font-black">CLOSE</button>
+        </div>
+        <div class="space-y-10">
+            <section class="glass-card p-6 rounded-[30px] space-y-3">
+                <h3 class="text-xs font-bold text-blue-500 mb-2 uppercase">Add New Task</h3>
+                <input id="task-name" type="text" placeholder="Task Name" class="w-full p-4 rounded-2xl text-xs outline-none">
+                <input id="task-link" type="text" placeholder="URL Link" class="w-full p-4 rounded-2xl text-xs outline-none">
+                <input id="task-reward" type="number" placeholder="Reward Coins" class="w-full p-4 rounded-2xl text-xs outline-none">
+                <button onclick="addOrUpdateTask()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase">Publish</button>
+            </section>
+            <section id="admin-payout-list" class="space-y-3"></section>
+            <section id="admin-task-list" class="space-y-2"></section>
         </div>
     </div>
+
+    <div id="withdraw-screen" class="fixed inset-0 bg-black z-50 p-8 hidden-screen">
+        <button onclick="closeScreen('withdraw-screen')" class="text-zinc-500 font-bold mb-10 text-[10px] uppercase">← Back</button>
+        <h2 class="text-3xl font-black mb-4 italic text-yellow-500">Withdrawal</h2>
+        <div class="glass-card p-6 rounded-3xl mb-8">
+            <p class="text-[10px] text-zinc-500 uppercase font-bold mb-1">UPI Address</p>
+            <input id="upi-id" type="text" placeholder="9876543210@paytm" class="w-full p-5 rounded-2xl mb-4 text-center font-bold outline-none border">
+        </div>
+        <button onclick="submitWithdraw()" class="w-full btn-premium py-5 rounded-3xl font-black text-sm uppercase">Request Payout</button>
+    </div>
+
+    <div id="history-screen" class="fixed inset-0 bg-black z-50 p-6 overflow-y-auto hidden-screen">
+        <button onclick="closeScreen('history-screen')" class="text-zinc-500 font-bold mb-8 text-[10px] uppercase">← Back</button>
+        <h2 class="text-3xl font-black mb-8 italic">History</h2>
+        <div id="history-list" class="space-y-3"></div>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/80 border-t border-zinc-900 p-4 flex justify-around items-center z-40 backdrop-blur-xl">
+        <button onclick="location.reload()" class="flex flex-col items-center gap-1 text-[10px] font-bold nav-active">🏠<span>Home</span></button>
+        <button onclick="openScreen('history-screen')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-zinc-500">📜<span>History</span></button>
+        <button onclick="openScreen('withdraw-screen')" class="flex flex-col items-center gap-1 text-[10px] font-bold text-zinc-500">💳<span>Wallet</span></button>
+        <button onclick="logout()" class="flex flex-col items-center gap-1 text-[10px] font-bold text-red-900 font-black">🔒<span>Logout</span></button>
+    </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, remove, update, runTransaction, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyA7t1eGYytS6hSbFjNM5uoRuSWHMlueYZo",
             authDomain: "studio-chat-5ed18.firebaseapp.com",
@@ -82,65 +151,129 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
+        const ADMIN_EMAIL = "draghav349@gmail.com";
 
-        // 1. LOGIN FUNCTION
-        window.loginWithGoogle = () => {
-            const status = document.getElementById('auth-status');
-            status.innerText = "Connecting...";
-            
-            signInWithPopup(auth, provider)
-                .then(async (result) => {
-                    const user = result.user;
-                    console.log("Logged in as:", user.displayName);
-                    
-                    // User data check/save
-                    const userRef = ref(db, 'users/' + user.uid);
-                    const snap = await get(userRef);
-                    if(!snap.exists()) {
-                        await set(userRef, {
-                            name: user.displayName,
-                            email: user.email,
-                            photo: user.photoURL,
-                            uid: user.uid
-                        });
-                        // Create initial wallet
-                        await set(ref(db, 'wallets/' + user.uid), 100); // 100 coins welcome bonus
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    status.innerText = "Error: " + error.message;
-                    alert("Galti: Firebase Console mein Google Auth enable karein.");
-                });
-        };
-
-        // 2. AUTH STATE LISTENER (Auto-Login)
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden-screen');
                 document.getElementById('app-interface').classList.remove('hidden-screen');
-                
                 document.getElementById('user-name').innerText = user.displayName;
                 document.getElementById('user-photo').src = user.photoURL;
-
-                // Watch Balance
-                onValue(ref(db, 'wallets/' + user.uid), (snapshot) => {
-                    const balance = snapshot.val() || 0;
-                    document.getElementById('balance').innerText = balance;
-                    document.getElementById('rupees').innerText = Math.floor(balance / 100);
+                if(user.email === ADMIN_EMAIL) {
+                    document.getElementById('admin-btn').classList.remove('hidden');
+                    loadAdminPanel();
+                }
+                onValue(ref(db, 'wallets/' + user.uid), s => {
+                    const v = s.val() || 0;
+                    document.getElementById('balance').innerText = v;
+                    document.getElementById('rupees').innerText = Math.floor(v/100);
                 });
+                loadUserTasks();
+                loadHistory();
             } else {
                 document.getElementById('login-screen').classList.remove('hidden-screen');
-                document.getElementById('app-interface').classList.add('hidden-screen');
             }
         });
 
-        // 3. LOGOUT
-        window.logout = () => {
-            signOut(auth).then(() => {
-                location.reload();
-            });
+        // EARNING LOGICS
+        window.dailyCheckIn = async () => {
+            const date = new Date().toLocaleDateString();
+            const last = await get(ref(db, `checks/${auth.currentUser.uid}`));
+            if(last.val() === date) return alert("Aaj ka reward mil chuka hai!");
+            await set(ref(db, `checks/${auth.currentUser.uid}`), date);
+            addCoins(50, "Daily Bonus");
+            alert("50 Coins added!");
         };
+
+        window.spinWheel = () => {
+            const win = [10, 20, 50, 100][Math.floor(Math.random()*4)];
+            addCoins(win, "Wheel Win");
+            alert("Aapne jeete " + win + " coins!");
+        };
+
+        function addCoins(amt, type) {
+            runTransaction(ref(db, 'wallets/' + auth.currentUser.uid), c => (c || 0) + amt);
+            push(ref(db, 'history/' + auth.currentUser.uid), { type, amt, date: new Date().toLocaleDateString(), status: 'Credit ✅' });
+        }
+
+        // USER FUNCTIONS
+        function loadUserTasks() {
+            onValue(ref(db, 'tasks'), (snap) => {
+                const list = document.getElementById('user-task-list');
+                list.innerHTML = '';
+                snap.forEach(child => {
+                    const t = child.val();
+                    const icon = t.name.toLowerCase().includes('youtube') ? '📺' : '⚡';
+                    list.innerHTML += `<div class="glass-card p-5 task-card flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center">${icon}</div>
+                            <div><h4 class="font-bold text-sm">${t.name}</h4><p class="text-green-500 text-[10px] font-black">+${t.reward} COINS</p></div>
+                        </div>
+                        <button onclick="window.open('${t.link}'); addCoins(${t.reward}, 'Task: ${t.name}')" class="bg-white text-black px-5 py-2 rounded-xl text-[10px] font-black">GO</button>
+                    </div>`;
+                });
+            });
+        }
+
+        window.submitWithdraw = () => {
+            const upi = document.getElementById('upi-id').value;
+            const bal = parseInt(document.getElementById('balance').innerText);
+            if(bal < 1000) return alert("Min 1000 required");
+            const hRef = push(ref(db, 'history/' + auth.currentUser.uid));
+            push(ref(db, 'payouts'), { uid: auth.currentUser.uid, email: auth.currentUser.email, upi, amt: bal, hKey: hRef.key });
+            set(hRef, { type: 'Withdrawal', amt: bal, date: new Date().toLocaleDateString(), status: 'Processing ⏳' });
+            set(ref(db, 'wallets/' + auth.currentUser.uid), 0);
+            alert("Payout Requested!");
+            closeScreen('withdraw-screen');
+        };
+
+        function loadHistory() {
+            onValue(ref(db, 'history/' + auth.currentUser.uid), (snap) => {
+                const list = document.getElementById('history-list');
+                list.innerHTML = '';
+                snap.forEach(child => {
+                    const h = child.val();
+                    const isC = h.type.includes('Withdrawal') ? false : true;
+                    list.innerHTML = `<div class="glass-card p-4 rounded-2xl flex justify-between items-center mb-2 border-l-2 ${isC?'border-green-500':'border-red-500'}">
+                        <p class="text-[10px] font-bold uppercase">${h.type}</p>
+                        <p class="text-sm font-black">${isC?'+':'-'}${h.amt}</p>
+                    </div>` + list.innerHTML;
+                });
+            });
+        }
+
+        // ADMIN PANEL
+        window.addOrUpdateTask = () => {
+            const name = document.getElementById('task-name').value;
+            const link = document.getElementById('task-link').value;
+            const reward = parseInt(document.getElementById('task-reward').value);
+            if(name && link && reward) push(ref(db, 'tasks'), { name, link, reward });
+        };
+
+        function loadAdminPanel() {
+            onValue(ref(db, 'payouts'), snap => {
+                const list = document.getElementById('admin-payout-list');
+                list.innerHTML = '<h3 class="text-xs font-bold text-yellow-500 mb-2 uppercase tracking-widest">Payout Requests</h3>';
+                snap.forEach(child => {
+                    const p = child.val();
+                    list.innerHTML += `<div class="glass-card p-4 rounded-2xl mb-2">
+                        <p class="text-[10px]">${p.email}</p>
+                        <p class="font-black text-sm text-yellow-500">₹${p.amt/100} - ${p.upi}</p>
+                        <button onclick="payoutRes('${child.key}', '${p.uid}', '${p.hKey}', 'Success ✅')" class="bg-green-600 w-full mt-2 py-2 rounded-xl text-[10px] font-black">APPROVE</button>
+                    </div>`;
+                });
+            });
+        }
+
+        window.payoutRes = (id, uid, hKey, status) => {
+            update(ref(db, `history/${uid}/${hKey}`), { status });
+            remove(ref(db, 'payouts/' + id));
+        };
+
+        window.openScreen = (id) => document.getElementById(id).classList.remove('hidden-screen');
+        window.closeScreen = (id) => document.getElementById(id).classList.add('hidden-screen');
+        window.loginWithGoogle = () => signInWithPopup(auth, provider);
+        window.logout = () => signOut(auth).then(() => location.reload());
     </script>
 </body>
 </html>
