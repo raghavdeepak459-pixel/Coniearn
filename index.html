@@ -101,7 +101,7 @@
         <div class="glass p-8 w-full max-w-sm mx-auto text-center">
             <h2 class="text-xl font-black text-green-500 mb-6 italic uppercase">Withdraw</h2>
             <input id="upi-id" placeholder="UPI ID" class="w-full bg-black p-4 rounded-xl mb-3 text-sm border border-white/10 outline-none">
-            <input id="w-amt" type="number" placeholder="Coins (Min 500)" class="w-full bg-black p-4 rounded-xl mb-6 text-sm border border-white/10 outline-none">
+            <input id="w-amt" type="number" placeholder="Coins (Min 5000)" class="w-full bg-black p-4 rounded-xl mb-6 text-sm border border-white/10 outline-none">
             <button onclick="requestWithdraw()" class="w-full btn-blue py-4 rounded-xl font-black text-xs uppercase">Submit</button>
             <button onclick="closeScreens()" class="mt-4 text-zinc-600 text-[10px] uppercase">Back</button>
         </div>
@@ -116,7 +116,7 @@
     <div id="game-screen" class="overlay hidden-screen flex flex-col items-center justify-center">
         <h2 class="font-black text-2xl text-yellow-500 mb-10 italic uppercase">Head Or Tail</h2>
         <div id="coin" class="w-24 h-24 bg-yellow-500 rounded-full border-8 border-yellow-600 flex items-center justify-center text-4xl font-black text-yellow-900 shadow-2xl mb-12 transition-all duration-700">C</div>
-        <input id="bet-amt" type="number" placeholder="Bet (Max 500)" class="w-full max-w-xs bg-zinc-900 p-4 rounded-xl text-center mb-4 border border-white/10 outline-none font-bold">
+        <input id="bet-amt" type="number" placeholder="Bet (Min 50)" class="w-full max-w-xs bg-zinc-900 p-4 rounded-xl text-center mb-4 border border-white/10 outline-none font-bold">
         <div class="flex gap-4 w-full max-w-xs" id="game-btns">
             <button onclick="playFlip('HEAD')" class="flex-1 bg-white text-black py-4 rounded-xl font-black text-xs">HEAD</button>
             <button onclick="playFlip('TAIL')" class="flex-1 bg-zinc-800 text-white py-4 rounded-xl font-black text-xs">TAIL</button>
@@ -196,7 +196,7 @@
 
         window.doTask = (link, reward) => {
             window.open(link, '_blank');
-            notify("Stay 15s on page...");
+            notify("Stay 30s on page...");
             setTimeout(() => {
                 db.ref('users/'+auth.currentUser.uid+'/balance').transaction(b => (b||0)+reward);
                 notify("MISSION COMPLETED!");
@@ -278,7 +278,7 @@
         // Utils
         window.requestWithdraw = () => {
             const upi = document.getElementById('upi-id').value, amt = parseInt(document.getElementById('w-amt').value), bal = parseInt(document.getElementById('bal').innerText);
-            if(amt < 500 || amt > bal || !upi.includes('@')) return notify("Check Min 500/UPI!");
+            if(amt < 5000 || amt > bal || !upi.includes('@')) return notify("Check Min 5000/UPI!");
             db.ref('users/'+auth.currentUser.uid+'/balance').set(bal - amt);
             db.ref('payouts').push({ uid: auth.currentUser.uid, name: auth.currentUser.displayName || "User", upi, amt, status: 'pending', date: new Date().toLocaleDateString() });
             notify("REQUEST SENT!"); closeScreens();
@@ -288,8 +288,8 @@
             db.ref('payouts').on('value', s => {
                 const h = document.getElementById('h-list'); h.innerHTML = '';
                 s.forEach(p => { if(p.val().uid === auth.currentUser.uid) {
-                    h.innerHTML += `<div class="glass p-4 flex justify-between items-center"><div><p class="text-xs font-black">₹${p.val().amt/100}</p><p class="text-[9px] text-zinc-500">${p.val().date}</p></div>
-                    <span class="text-[9px] font-black uppercase ${p.val().status==='pending'?'text-yellow-500':p.val().status==='Rejected'?'text-red-500':'text-green-500'}">${p.val().status}</span></div>`;
+                    h.innerHTML += `<div class="glass p-4 flex justify-between items-center"><div><p class="text-xs font-black">₹${p.val().amt/100}</p><p class="text-[9px] text-zinc-5000">${p.val().date}</p></div>
+                    <span class="text-[9px] font-black uppercase ${p.val().status==='pending'?'text-yellow-5000':p.val().status==='Rejected'?'text-red-5000':'text-green-5000'}">${p.val().status}</span></div>`;
                 }});
             });
         }
